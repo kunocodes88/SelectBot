@@ -1,13 +1,5 @@
 import { initializeApp } from 'firebase/app';
 import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithPopup,
-  signOut as firebaseSignOut,
-  onAuthStateChanged,
-  User as FirebaseUser,
-} from 'firebase/auth';
-import {
   getFirestore,
   doc,
   getDocFromServer,
@@ -20,10 +12,6 @@ const app = initializeApp(firebaseConfig);
 // Initialize Cloud Firestore with specified database ID
 // CRITICAL: The app will break without firebaseConfig.firestoreDatabaseId
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-
-// Initialize Firebase Auth
-export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
 
 export enum OperationType {
   CREATE = 'create',
@@ -41,34 +29,21 @@ export interface FirestoreErrorInfo {
   authInfo: {
     userId?: string | null;
     email?: string | null;
-    emailVerified?: boolean | null;
-    isAnonymous?: boolean | null;
-    tenantId?: string | null;
-    providerInfo?: {
-      providerId?: string | null;
-      email?: string | null;
-    }[];
+    provider?: string | null;
   };
 }
 
 /**
- * Standard Firestore error handler conforming to skill requirements.
+ * Standard Firestore error handler.
  * Throws a JSON-serialized FirestoreErrorInfo when errors occur.
  */
 export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null): never {
   const errInfo: FirestoreErrorInfo = {
     error: error instanceof Error ? error.message : String(error),
     authInfo: {
-      userId: auth.currentUser?.uid || null,
-      email: auth.currentUser?.email || null,
-      emailVerified: auth.currentUser?.emailVerified || null,
-      isAnonymous: auth.currentUser?.isAnonymous || null,
-      tenantId: auth.currentUser?.tenantId || null,
-      providerInfo:
-        auth.currentUser?.providerData?.map((provider) => ({
-          providerId: provider.providerId,
-          email: provider.email,
-        })) || [],
+      userId: null,
+      email: null,
+      provider: 'supabase',
     },
     operationType,
     path,
@@ -97,6 +72,3 @@ export async function testConnection(): Promise<boolean> {
 testConnection().catch((err) => {
   console.warn('Firebase initial connection check notice:', err?.message || err);
 });
-
-export { signInWithPopup, firebaseSignOut, onAuthStateChanged };
-export type { FirebaseUser };

@@ -2678,6 +2678,133 @@
           }
         }
       ]
+    },
+    {
+      "id": "conv_1792405579109_2a4y",
+      "botId": "5c1b62ea-06a4-4c27-accb-1d39ad453518",
+      "customerSessionId": "client_1792405579109",
+      "startedAt": "2026-10-19T10:26:19.109Z",
+      "lastActivityAt": "2026-10-19T10:26:19.109Z",
+      "status": "active",
+      "messages": [
+        {
+          "id": "msg_init_1792405579109",
+          "conversationId": "conv_1792405579109_2a4y",
+          "sender": "bot",
+          "text": "Hey! Welcome to y. How can we help you today?",
+          "timestamp": "2026-10-19T10:26:19.109Z",
+          "payload": {
+            "type": "menu",
+            "menuItems": [
+              {
+                "id": "menu_services",
+                "title": "Services & Prices",
+                "description": "Explore portrait, wedding, and event packages",
+                "icon": "camera"
+              },
+              {
+                "id": "menu_portfolio",
+                "title": "Portfolio & Galleries",
+                "description": "View curated highlights from recent sessions",
+                "icon": "image"
+              },
+              {
+                "id": "menu_policies",
+                "title": "Policies & Information",
+                "description": "Session prep, turnaround times, and booking terms",
+                "icon": "file-text"
+              },
+              {
+                "id": "menu_delivery",
+                "title": "Delivery & Print Ordering",
+                "description": "Download formats, cloud backup, and print studio",
+                "icon": "truck"
+              },
+              {
+                "id": "menu_talk_to_person",
+                "title": "Custom Message — Talk to a Person",
+                "description": "Leave a direct message for the studio team",
+                "icon": "user"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "conv_1792408946300_9tut",
+      "botId": "bot_1792390796397_ap82",
+      "customerSessionId": "client_1792408946300",
+      "startedAt": "2026-10-19T11:22:26.300Z",
+      "lastActivityAt": "2026-10-19T11:22:34.211Z",
+      "status": "active",
+      "messages": [
+        {
+          "id": "msg_init_1792408946300",
+          "conversationId": "conv_1792408946300_9tut",
+          "sender": "bot",
+          "text": "Hey! Welcome to y. How can we help you today?",
+          "timestamp": "2026-10-19T11:22:26.300Z",
+          "payload": {
+            "type": "menu",
+            "menuItems": [
+              {
+                "id": "menu_services",
+                "title": "Services & Prices",
+                "description": "Explore portrait, wedding, and event packages",
+                "icon": "camera"
+              },
+              {
+                "id": "menu_portfolio",
+                "title": "Portfolio & Galleries",
+                "description": "View curated highlights from recent sessions",
+                "icon": "image"
+              },
+              {
+                "id": "menu_policies",
+                "title": "Policies & Information",
+                "description": "Session prep, turnaround times, and booking terms",
+                "icon": "file-text"
+              },
+              {
+                "id": "menu_delivery",
+                "title": "Delivery & Print Ordering",
+                "description": "Download formats, cloud backup, and print studio",
+                "icon": "truck"
+              },
+              {
+                "id": "menu_talk_to_person",
+                "title": "Custom Message — Talk to a Person",
+                "description": "Leave a direct message for the studio team",
+                "icon": "user"
+              }
+            ]
+          }
+        },
+        {
+          "id": "msg_u_1792408950181",
+          "conversationId": "conv_1792408946300_9tut",
+          "sender": "customer",
+          "text": "How much is a portrait session?",
+          "timestamp": "2026-10-19T11:22:30.181Z"
+        },
+        {
+          "id": "msg_b_1792408954210",
+          "conversationId": "conv_1792408946300_9tut",
+          "sender": "bot",
+          "text": "Our **Signature Portrait Session** starts at **R 290.00**.\n\n**Here is what’s included:**\n* **Duration:** 60 minutes of shooting time\n* **Outfits:** Up to 2 wardrobe changes\n* **Deliverables:** Online proofing gallery with 40+ proofs and 5 high-resolution retouched digital files\n\n*Optional add-on:* Hair and makeup styling is available for an additional R 95.00. \n\nWould you like to check our availability or see what to prepare for your session?",
+          "timestamp": "2026-10-19T11:22:34.210Z",
+          "payload": {
+            "type": "ai_response",
+            "sourceConfidence": "knowledge_base",
+            "breadcrumbs": [
+              {
+                "label": "Main Menu"
+              }
+            ]
+          }
+        }
+      ]
     }
   ],
   "handoffRequests": [

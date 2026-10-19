@@ -1,7 +1,6 @@
 import React from 'react';
 import { Bot, Plus, Layers, Inbox, CheckCircle2, TrendingUp, Settings, LogIn, LogOut, Database } from 'lucide-react';
 import { Workspace } from '../types';
-import { useFirebaseAuth } from '../context/FirebaseAuthContext';
 import { useSupabaseAuth } from '../context/SupabaseAuthContext';
 
 interface HeaderProps {
@@ -23,21 +22,18 @@ export function Header({
   currentWorkspace,
   unresolvedCount,
 }: HeaderProps) {
-  const { user: firebaseUser, loading: fbLoading, signOut: fbSignOut } = useFirebaseAuth();
   const { user: supabaseUser, profile: supabaseProfile, signOut: sbSignOut } = useSupabaseAuth();
 
-  const activeUser = supabaseUser || firebaseUser;
+  const activeUser = supabaseUser;
   const activeDisplayName =
     supabaseProfile?.displayName ||
     (supabaseUser?.user_metadata as any)?.full_name ||
     (supabaseUser?.user_metadata as any)?.display_name ||
-    firebaseUser?.displayName ||
     activeUser?.email?.split('@')[0] ||
     'Customer';
 
   const handleSignOut = () => {
-    if (supabaseUser) sbSignOut();
-    if (firebaseUser) fbSignOut();
+    sbSignOut();
   };
 
   return (

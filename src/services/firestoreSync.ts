@@ -1,4 +1,4 @@
-import { db, handleFirestoreError, OperationType, auth } from '../firebase';
+import { db, handleFirestoreError, OperationType } from '../firebase';
 import { doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { ChatbotConfig, ChatMessage, Conversation, HumanAssistanceRequest, ActionSubmission, KnowledgeBaseItem, Workspace } from '../types';
 
@@ -17,7 +17,7 @@ export const firestoreSync = {
         name: workspace.name.slice(0, 120),
         industry: (workspace.industry || 'General').slice(0, 100),
         ownerId: userId,
-        ownerEmail: auth.currentUser?.email || '',
+        ownerEmail: workspace.ownerEmail || '',
         createdAt: workspace.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }, { merge: true });

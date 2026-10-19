@@ -16,12 +16,10 @@ import { LoginView } from './components/LoginView';
 import { StandaloneChatPage } from './components/StandaloneChatPage';
 import { PublicWidgetShowcase } from './components/PublicWidgetShowcase';
 import { SupabaseMigrationModal } from './components/SupabaseMigrationModal';
+import { ResetPasswordModal } from './components/ResetPasswordModal';
 import { ChevronDown, AlertCircle, RefreshCw } from 'lucide-react';
 
-import { useFirebaseAuth } from './context/FirebaseAuthContext';
 import { useSupabaseAuth } from './context/SupabaseAuthContext';
-import { firestoreSync } from './services/firestoreSync';
-import { firebaseAuthService } from './services/firebaseAuthService';
 import { supabaseDataService } from './services/supabaseDataService';
 import { isSupabaseConfigured } from './services/supabaseClient';
 
@@ -76,11 +74,16 @@ export default function App() {
   }
 
   // -------------------------------------------------------------
-  // PROTECTED OWNER DASHBOARD (Requires Authentication)
+  // PROTECTED OWNER DASHBOARD (Supabase Authentication Sole System)
   // Only accessed on / and internal management routes
   // -------------------------------------------------------------
-  const { user: firebaseUser, loading: fbLoading, signInWithGoogle } = useFirebaseAuth();
-  const { user: supabaseUser, profile: supabaseProfile, loading: sbLoading } = useSupabaseAuth();
+  const {
+    user: supabaseUser,
+    profile: supabaseProfile,
+    loading: authLoading,
+    signInWithGoogle,
+    isPasswordRecovery,
+  } = useSupabaseAuth();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -98,19 +101,18 @@ export default function App() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState(false);
 
-  // Determine active authenticated user across Supabase and Firebase
-  const activeUser = supabaseUser || firebaseUser;
-  const activeUserId = supabaseUser?.id || firebaseUser?.uid;
-  const authLoading = sbLoading || fbLoading;
+  // Canonical authenticated user from Supabase Auth
+  const activeUser = supabaseUser;
+  const activeUserId = supabaseUser?.id || (guestMode ? 'guest_user' : '');
 
-  // Load App Data from Supabase / Firebase / Local
+  // Load App Data from Supabase / Starter Templates
   const loadAppData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
       if (supabaseUser) {
-        // Authenticated via Supabase
+        // Authenticated customer via Supabase
         const userBots = await supabaseDataService.getUserBots(supabaseUser.id);
         const ws: Workspace = {
           id: `ws_${supabaseUser.id.substring(0, 8)}`,
@@ -126,7 +128,7 @@ export default function App() {
           setBots(userBots);
           setActiveBotId((prev) => (prev && userBots.some((b) => b.id === prev) ? prev : userBots[0].id));
         } else {
-          // If no bots in Supabase yet, seed from server templates
+          // If no bots in Supabase yet, seed from starter bots
           const starterBots = await api.getBots();
           if (starterBots.length > 0) {
             setBots(starterBots);
@@ -137,28 +139,25 @@ export default function App() {
         // Fetch analytics
         const a = await api.getAnalytics();
         setAnalytics(a);
-      } else if (firebaseUser) {
-        // Authenticated via Firebase
-        const session = await firebaseAuthService.initUserSession(firebaseUser);
-        setWorkspaces(session.workspaces);
-        const activeWs = session.currentWorkspace || session.workspaces[0];
-        setCurrentWorkspace(activeWs);
-        setBots(session.bots);
-
-        if (session.bots.length > 0) {
-          setActiveBotId((prev) => (prev && session.bots.some((b) => b.id === prev) ? prev : session.bots[0].id));
-        }
-        setAnalytics(session.analytics);
       } else if (guestMode) {
-        // Guest mode fallback
-        const session = firebaseAuthService.getGuestSession();
-        setWorkspaces(session.workspaces);
-        setCurrentWorkspace(session.currentWorkspace || session.workspaces[0]);
-        setBots(session.bots);
-        if (session.bots.length > 0) {
-          setActiveBotId(session.bots[0].id);
+        // Guest mode preview
+        const guestWs: Workspace = {
+          id: 'ws_guest_1',
+          name: 'Lens & Light Studio',
+          industry: 'Photography Studio',
+          ownerEmail: 'guest@example.com',
+          createdAt: new Date().toISOString(),
+        };
+        setWorkspaces([guestWs]);
+        setCurrentWorkspace(guestWs);
+
+        const starterBots = await api.getBots();
+        setBots(starterBots);
+        if (starterBots.length > 0) {
+          setActiveBotId(starterBots[0].id);
         }
-        setAnalytics(session.analytics);
+        const a = await api.getAnalytics();
+        setAnalytics(a);
       }
     } catch (err: any) {
       console.error('Failed to initialize app data:', err);
@@ -166,7 +165,7 @@ export default function App() {
     } finally {
       setLoading(false);
     }
-  }, [supabaseUser, supabaseProfile, firebaseUser, guestMode]);
+  }, [supabaseUser, supabaseProfile, guestMode]);
 
   // Main bootstrap sequence for Owner Dashboard
   useEffect(() => {
@@ -181,19 +180,13 @@ export default function App() {
     }
   }, [authLoading, activeUser, guestMode, loadAppData]);
 
-  // Update a single bot in state & sync to Supabase / Firestore
+  // Update a single bot in state & sync to Supabase
   const handleUpdateBot = (updated: ChatbotConfig) => {
     setBots((prev) => prev.map((b) => (b.id === updated.id ? updated : b)));
 
     if (supabaseUser) {
       supabaseDataService.saveBot(updated, supabaseUser.id).catch((e) => {
         console.warn('Supabase bot sync notice:', e);
-      });
-    }
-
-    if (firebaseUser) {
-      firestoreSync.saveChatbot(updated, firebaseUser.uid).catch((e) => {
-        console.warn('Firestore bot sync notice:', e);
       });
     }
 
@@ -208,14 +201,16 @@ export default function App() {
     if (supabaseUser) {
       supabaseDataService.saveBot(newBot, supabaseUser.id).catch(console.warn);
     }
-    if (firebaseUser) {
-      firestoreSync.saveChatbot(newBot, firebaseUser.uid).catch(console.warn);
-    }
 
     api.getAnalytics().then(setAnalytics).catch(console.error);
   };
 
-  // Loading state while resolving auth
+  // Password Recovery Mode: Render Password Reset Screen
+  if (isPasswordRecovery) {
+    return <ResetPasswordModal />;
+  }
+
+  // Loading state while resolving Supabase auth session
   if (authLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">

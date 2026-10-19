@@ -10,7 +10,7 @@ import {
   MainMenuItem,
   SubtopicItem,
 } from '../types';
-import { db, auth } from '../firebase';
+import { db } from '../firebase';
 import {
   collection,
   doc,
@@ -22,18 +22,70 @@ import {
 } from 'firebase/firestore';
 import { firestoreSync } from './firestoreSync';
 import { STARTER_TEMPLATES } from '../data/templates';
-import { generateDefaultAnalytics } from './firebaseAuthService';
 import { supabaseDataService } from './supabaseDataService';
+import { supabase } from './supabaseClient';
+
+export function generateDefaultAnalytics(bots: ChatbotConfig[]): BotAnalytics {
+  return {
+    totalConversations: 18,
+    totalMessages: 64,
+    totalHandoffRequests: 2,
+    unresolvedHandoffRequests: 1,
+    totalActionSubmissions: 5,
+    topMenuClicks: [
+      { menuId: 'menu_services', title: 'Services & Packages', count: 32 },
+      { menuId: 'menu_portfolio', title: 'Portfolio & Work', count: 21 },
+      { menuId: 'menu_policies', title: 'Studio Policies', count: 8 },
+    ],
+    conversationsByDay: [
+      { date: 'Mon', count: 3 },
+      { date: 'Tue', count: 5 },
+      { date: 'Wed', count: 4 },
+      { date: 'Thu', count: 8 },
+      { date: 'Fri', count: 6 },
+      { date: 'Sat', count: 12 },
+      { date: 'Sun', count: 9 },
+    ],
+    recentActivity: [
+      {
+        id: 'act_sb_1',
+        type: 'auth_success',
+        description: 'Supabase Authentication active & session established',
+        timestamp: 'Just now',
+      },
+      {
+        id: 'act_sb_2',
+        type: 'bot_active',
+        description: 'Chatbot engine ready for customer conversations',
+        timestamp: '5m ago',
+      },
+    ],
+  };
+}
+
+async function getCurrentUserAuthInfo(): Promise<{ uid: string; email: string }> {
+  try {
+    const { data } = await supabase.auth.getSession();
+    if (data?.session?.user) {
+      return {
+        uid: data.session.user.id,
+        email: data.session.user.email || '',
+      };
+    }
+  } catch {}
+  return { uid: 'guest_user', email: '' };
+}
 
 export const api = {
   // Workspaces
   async createWorkspace(name: string, industry: string): Promise<Workspace> {
-    const cleanUid = auth.currentUser?.uid || 'guest_user';
+    const userAuth = await getCurrentUserAuthInfo();
+    const cleanUid = userAuth.uid;
     const newWs: Workspace = {
       id: `ws_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       name: name.slice(0, 120),
       industry: industry.slice(0, 100),
-      ownerEmail: auth.currentUser?.email || '',
+      ownerEmail: userAuth.email,
       createdAt: new Date().toISOString(),
     };
 
@@ -68,7 +120,8 @@ export const api = {
       // Backend route unavailable on Vercel, fallback to Firestore
     }
 
-    const cleanUid = auth.currentUser?.uid;
+    const userAuth = await getCurrentUserAuthInfo();
+    const cleanUid = userAuth.uid !== 'guest_user' ? userAuth.uid : null;
     if (cleanUid) {
       try {
         const q = query(collection(db, 'chatbots'), where('ownerId', '==', cleanUid));
@@ -113,7 +166,8 @@ export const api = {
     templateId?: string;
     conversationStyle?: string;
   }): Promise<ChatbotConfig> {
-    const cleanUid = auth.currentUser?.uid || 'guest_user';
+    const userAuth = await getCurrentUserAuthInfo();
+    const cleanUid = userAuth.uid;
 
     try {
       const res = await fetch('/api/bots', {
@@ -147,7 +201,7 @@ export const api = {
       industry: payload.industry.slice(0, 100),
       description: payload.description || '',
       website: payload.website || '',
-      contactEmail: payload.contactEmail || auth.currentUser?.email || '',
+      contactEmail: payload.contactEmail || userAuth.email || '',
       contactPhone: payload.contactPhone || '',
       conversationStyle: (payload.conversationStyle as any) || 'hybrid',
       status: 'draft',
@@ -190,7 +244,8 @@ export const api = {
   },
 
   async updateBot(id: string, updates: Partial<ChatbotConfig>): Promise<ChatbotConfig> {
-    const cleanUid = auth.currentUser?.uid || 'guest_user';
+    const userAuth = await getCurrentUserAuthInfo();
+    const cleanUid = userAuth.uid;
 
     try {
       const res = await fetch(`/api/bots/${id}`, {
@@ -234,7 +289,8 @@ export const api = {
       updatedAt: new Date().toISOString(),
     };
 
-    const cleanUid = auth.currentUser?.uid || 'guest_user';
+    const userAuth = await getCurrentUserAuthInfo();
+    const cleanUid = userAuth.uid;
     await firestoreSync.saveChatbot(duplicated, cleanUid);
     return duplicated;
   },

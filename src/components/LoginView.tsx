@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
 import {
-  Bot,
   ArrowRight,
   ShieldCheck,
   Zap,
-  Layers,
-  Sparkles,
   AlertCircle,
   Mail,
   Lock,
@@ -14,6 +11,8 @@ import {
   CheckCircle2,
   HelpCircle,
   ExternalLink,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { isSupabaseConfigured, getSupabaseConfigStatus } from '../services/supabaseClient';
 import { supabaseAuthService } from '../services/supabaseAuthService';
@@ -38,9 +37,22 @@ export function LoginView({
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [showConfigHelper, setShowConfigHelper] = useState(!isSupabaseConfigured);
+  const [showOAuthGuide, setShowOAuthGuide] = useState(false);
+  const [copiedCallback, setCopiedCallback] = useState(false);
 
   const supabaseStatus = getSupabaseConfigStatus();
+
+  // Derive Supabase project callback URL
+  const supabaseProjectRef = supabaseStatus.url
+    ? supabaseStatus.url.replace('https://', '').split('.')[0]
+    : 'your-project-ref';
+  const supabaseOAuthCallbackUrl = `https://${supabaseProjectRef}.supabase.co/auth/v1/callback`;
+
+  const copyCallbackUrl = () => {
+    navigator.clipboard.writeText(supabaseOAuthCallbackUrl);
+    setCopiedCallback(true);
+    setTimeout(() => setCopiedCallback(false), 2000);
+  };
 
   // Email/Password Submit Handler
   const handleSubmit = async (e: React.FormEvent) => {
@@ -52,7 +64,7 @@ export function LoginView({
     try {
       if (!isSupabaseConfigured) {
         throw new Error(
-          'Supabase environment variables (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY) are not set yet. You can explore as Guest or configure your keys.'
+          'Supabase environment variables (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY) are not set yet. You can explore as Guest or configure your project.'
         );
       }
 
@@ -60,9 +72,21 @@ export function LoginView({
         if (!displayName.trim() || !businessName.trim()) {
           throw new Error('Please provide your name and business name.');
         }
-        await supabaseAuthService.signUp(email.trim(), password, displayName.trim(), businessName.trim());
-        setSuccessMsg('Account created successfully! Check your inbox if email confirmation is enabled, or sign in.');
-        if (onSupabaseAuthSuccess) onSupabaseAuthSuccess();
+        const res = await supabaseAuthService.signUp(
+          email.trim(),
+          password,
+          displayName.trim(),
+          businessName.trim()
+        );
+
+        if (res.needsEmailConfirmation) {
+          setSuccessMsg(
+            `Account registered! We've sent a verification link to ${email.trim()}. Please verify your email or sign in if confirmation is disabled.`
+          );
+        } else {
+          setSuccessMsg('Account created successfully! Welcome to SelectBot.');
+          if (onSupabaseAuthSuccess) onSupabaseAuthSuccess();
+        }
       } else if (mode === 'signin') {
         await supabaseAuthService.signIn(email.trim(), password);
         if (onSupabaseAuthSuccess) onSupabaseAuthSuccess();
@@ -80,12 +104,25 @@ export function LoginView({
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setAuthError(null);
+    setSuccessMsg(null);
+
     try {
+      if (!isSupabaseConfigured) {
+        throw new Error(
+          'Supabase is not configured yet. Configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY, or explore as Guest.'
+        );
+      }
       await onSignInWithGoogle();
       if (onSupabaseAuthSuccess) onSupabaseAuthSuccess();
     } catch (err: any) {
-      if (err?.code !== 'auth/popup-closed-by-user') {
-        setAuthError(err?.message || 'Failed to complete Google Sign-In.');
+      const msg = err?.message || 'Failed to complete Google Sign-In.';
+      setAuthError(msg);
+      if (
+        msg.toLowerCase().includes('not enabled') ||
+        msg.toLowerCase().includes('unsupported provider') ||
+        msg.toLowerCase().includes('oauth')
+      ) {
+        setShowOAuthGuide(true);
       }
     } finally {
       setLoading(false);
@@ -117,10 +154,10 @@ export function LoginView({
                 </span>
                 <button
                   type="button"
-                  onClick={() => setShowConfigHelper(!showConfigHelper)}
+                  onClick={() => setShowOAuthGuide(!showOAuthGuide)}
                   className="text-[11px] text-indigo-600 hover:text-indigo-800 underline cursor-pointer"
                 >
-                  {showConfigHelper ? 'Hide guide' : 'Setup guide'}
+                  {showOAuthGuide ? 'Hide guide' : 'Setup guide'}
                 </button>
               </div>
               <p className="text-[11px] text-indigo-700 leading-relaxed">
@@ -169,7 +206,18 @@ export function LoginView({
           {authError && (
             <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-              <span>{authError}</span>
+              <div className="flex-1">
+                <p>{authError}</p>
+                {!showOAuthGuide && (
+                  <button
+                    type="button"
+                    onClick={() => setShowOAuthGuide(true)}
+                    className="mt-1 text-[11px] text-rose-800 underline font-semibold cursor-pointer"
+                  >
+                    View Supabase & Google OAuth setup instructions
+                  </button>
+                )}
+              </div>
             </div>
           )}
 
@@ -270,7 +318,7 @@ export function LoginView({
                 ? 'Create Customer Account'
                 : mode === 'forgot'
                 ? 'Send Reset Instructions'
-                : 'Sign In to Dashboard'}
+                : 'Sign In with Email'}
             </button>
           </form>
 
@@ -284,31 +332,122 @@ export function LoginView({
             </div>
           </div>
 
-          <button
-            onClick={handleGoogleSignIn}
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-slate-300 rounded-xl shadow-xs bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer disabled:opacity-50"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 24 24">
-              <path
-                fill="#4285F4"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-              />
-              <path
-                fill="#EA4335"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-              />
-            </svg>
-            <span>Continue with Google</span>
-          </button>
+          <div className="space-y-2">
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-slate-300 rounded-xl shadow-xs bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer disabled:opacity-50"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                />
+              </svg>
+              <span>Continue with Google</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowOAuthGuide(!showOAuthGuide)}
+              className="w-full text-center text-[11px] text-slate-500 hover:text-indigo-600 transition-colors cursor-pointer flex items-center justify-center gap-1"
+            >
+              <HelpCircle className="w-3 h-3" />
+              <span>Google OAuth setup documentation</span>
+            </button>
+          </div>
+
+          {/* Interactive Google OAuth & Supabase Setup Guide */}
+          {showOAuthGuide && (
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-slate-900 flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-indigo-600" />
+                  Supabase Google OAuth Setup
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => setShowOAuthGuide(false)}
+                  className="text-slate-400 hover:text-slate-600 text-xs"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-2.5 text-[11px] text-slate-600 leading-relaxed">
+                <div>
+                  <span className="font-bold text-slate-800">1. Required Callback URL in Supabase:</span>
+                  <div className="mt-1 flex items-center gap-1.5 p-1.5 bg-white border border-slate-200 rounded-lg">
+                    <code className="text-[10px] text-indigo-700 truncate flex-1 font-mono">
+                      {supabaseOAuthCallbackUrl}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={copyCallbackUrl}
+                      className="p-1 hover:bg-slate-100 rounded text-slate-600 cursor-pointer shrink-0"
+                      title="Copy callback URL"
+                    >
+                      {copiedCallback ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <span className="font-bold text-slate-800">2. Google Cloud Console:</span>
+                  <p className="mt-0.5">
+                    Create an OAuth 2.0 Client ID (Web application) in Google Cloud Console. Set:
+                  </p>
+                  <ul className="list-disc pl-4 mt-1 space-y-0.5 text-slate-500">
+                    <li>
+                      <strong>Authorized JavaScript Origins:</strong>{' '}
+                      <code className="font-mono text-[10px]">
+                        {typeof window !== 'undefined' ? window.location.origin : 'https://your-domain.vercel.app'}
+                      </code>
+                    </li>
+                    <li>
+                      <strong>Authorized Redirect URIs:</strong>{' '}
+                      <code className="font-mono text-[10px]">{supabaseOAuthCallbackUrl}</code>
+                    </li>
+                  </ul>
+                </div>
+
+                <div>
+                  <span className="font-bold text-slate-800">3. Supabase Dashboard Configuration:</span>
+                  <ul className="list-disc pl-4 mt-1 space-y-0.5 text-slate-500">
+                    <li>
+                      Go to <strong>Authentication</strong> &rarr; <strong>Providers</strong> &rarr; <strong>Google</strong>.
+                    </li>
+                    <li>Toggle <strong>Enable Google provider</strong> to ON.</li>
+                    <li>Paste your Google <strong>Client ID</strong> and <strong>Client Secret</strong>.</li>
+                    <li>
+                      Under <strong>URL Configuration</strong>, set <strong>Site URL</strong> to{' '}
+                      <code className="font-mono text-[10px]">
+                        {typeof window !== 'undefined' ? window.location.origin : 'https://your-domain.vercel.app'}
+                      </code>
+                      , and add wildcards like <code className="font-mono text-[10px]">https://*.vercel.app/*</code>.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Secondary Action: Demo / Guest Access */}
           <button
