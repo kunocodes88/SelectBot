@@ -21,6 +21,7 @@ import {
 import { firestoreSync } from './firestoreSync';
 import { STARTER_TEMPLATES } from '../data/templates';
 import { generateDefaultAnalytics } from './firebaseAuthService';
+import { supabaseDataService } from './supabaseDataService';
 
 export const api = {
   // Workspaces
@@ -419,7 +420,22 @@ export const api = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ botId, customerSessionId }),
       });
-      if (res.ok) return res.json();
+      if (res.ok) {
+        const data = await res.json();
+        // Persist session to Supabase when configured
+        if (supabaseDataService.isConfigured) {
+          const sessId = data.conversation?.customerSessionId || customerSessionId || `client_${Date.now()}`;
+          supabaseDataService.recordConversation(botId, sessId)
+            .then((sbConvId) => {
+              if (sbConvId && data.conversation?.messages?.[0]) {
+                const initMsg = data.conversation.messages[0];
+                supabaseDataService.recordMessage(sbConvId, 'bot', initMsg.text, initMsg.payload).catch(() => {});
+              }
+            })
+            .catch(() => {});
+        }
+        return data;
+      }
     } catch {
       // Backend route unavailable on Vercel, fallback to client-side session generator
     }
@@ -459,6 +475,16 @@ export const api = {
       messages: [initialMsg],
     };
 
+    if (supabaseDataService.isConfigured) {
+      supabaseDataService.recordConversation(botId, conv.customerSessionId)
+        .then((sbConvId) => {
+          if (sbConvId) {
+            supabaseDataService.recordMessage(sbConvId, 'bot', initialMsg.text, initialMsg.payload).catch(() => {});
+          }
+        })
+        .catch(() => {});
+    }
+
     return { conversation: conv, botName: bot?.name || 'SelectBot' };
   },
 
@@ -478,7 +504,19 @@ export const api = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      if (res.ok) return res.json();
+      if (res.ok) {
+        const data = await res.json();
+        // Persist to Supabase when configured
+        if (supabaseDataService.isConfigured) {
+          if (payload.text) {
+            supabaseDataService.recordMessage(payload.conversationId, 'customer', payload.text).catch(() => {});
+          }
+          if (data.botResponse?.text) {
+            supabaseDataService.recordMessage(payload.conversationId, 'bot', data.botResponse.text, data.botResponse.payload).catch(() => {});
+          }
+        }
+        return data;
+      }
     } catch {
       // Backend route unavailable on Vercel, fallback to client-side message generator
     }
@@ -564,6 +602,15 @@ export const api = {
       messages: [botResponse],
     };
 
+    if (supabaseDataService.isConfigured) {
+      if (payload.text) {
+        supabaseDataService.recordMessage(payload.conversationId, 'customer', payload.text).catch(() => {});
+      }
+      if (botResponse.text) {
+        supabaseDataService.recordMessage(payload.conversationId, 'bot', botResponse.text, botResponse.payload).catch(() => {});
+      }
+    }
+
     return { botResponse, conversation };
   },
 
@@ -576,37 +623,39 @@ export const api = {
   },
 
   // Public deployment check (Works for slug, deploymentId, or botId)
+  // CRITICAL: Public chatbot visitors require ZERO authentication, tokens, or ownership checks.
   async getPublicBot(deploymentId: string): Promise<any> {
+    if (!deploymentId) {
+      throw new Error('404 - Chatbot not found or not published.');
+    }
+
+    // 1. Direct Supabase query if configured (matches public_slug and status='published')
+    try {
+      if (supabaseDataService.isConfigured) {
+        const sbBot = await supabaseDataService.getPublicBotBySlug(deploymentId);
+        if (sbBot && sbBot.status === 'published') {
+          return sbBot;
+        }
+      }
+    } catch (sbErr) {
+      console.warn('Supabase getPublicBot notice:', sbErr);
+    }
+
+    // 2. Fetch from public server endpoints
     try {
       const res = await fetch(`/api/public/bot/${encodeURIComponent(deploymentId)}`);
       if (res.ok) {
         return await res.json();
       }
-      if (res.status === 403) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || 'This chatbot is currently in draft mode and not published.');
-      }
       if (res.status === 404) {
-        // Try slug route
         const slugRes = await fetch(`/api/public/slug/${encodeURIComponent(deploymentId)}`);
         if (slugRes.ok) return await slugRes.json();
       }
     } catch (err: any) {
-      if (err?.message && err.message.includes('draft mode')) {
-        throw err;
-      }
+      console.warn('Server getPublicBot fetch notice:', err);
     }
 
-    // Supabase fallback check for published bot
-    try {
-      const { supabaseDataService } = await import('./supabaseDataService');
-      const sbBot = await supabaseDataService.getPublicBotBySlug(deploymentId);
-      if (sbBot) return sbBot;
-    } catch {
-      // Supabase not yet configured or bot not found
-    }
-
-    // Firestore fallback
+    // 3. Firestore fallback
     try {
       const q = query(
         collection(db, 'chatbots'),
@@ -621,6 +670,7 @@ export const api = {
       console.warn('Firestore getPublicBot fallback notice:', e);
     }
 
-    throw new Error('This chatbot is currently in draft mode or the requested link is invalid.');
+    // Only missing or unpublished bots return 404
+    throw new Error('404 - Chatbot not found or not published.');
   },
 };

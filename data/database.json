@@ -1404,6 +1404,231 @@
           }
         }
       ]
+    },
+    {
+      "id": "conv_1792388980094_1o21",
+      "botId": "bot_photo_101",
+      "customerSessionId": "client_1792388980094",
+      "startedAt": "2026-10-19T05:49:40.094Z",
+      "lastActivityAt": "2026-10-19T05:49:40.094Z",
+      "status": "active",
+      "messages": [
+        {
+          "id": "msg_init_1792388980094",
+          "conversationId": "conv_1792388980094_1o21",
+          "sender": "bot",
+          "text": "Hey! Welcome to Lens & Light Photography. How can we help you today?",
+          "timestamp": "2026-10-19T05:49:40.094Z",
+          "payload": {
+            "type": "menu",
+            "menuItems": [
+              {
+                "id": "menu_services",
+                "title": "Services & Prices",
+                "description": "Explore portrait, wedding, and event packages",
+                "icon": "camera"
+              },
+              {
+                "id": "menu_portfolio",
+                "title": "Portfolio & Galleries",
+                "description": "View curated highlights from recent sessions",
+                "icon": "image"
+              },
+              {
+                "id": "menu_policies",
+                "title": "Policies & Information",
+                "description": "Session prep, turnaround times, and booking terms",
+                "icon": "file-text"
+              },
+              {
+                "id": "menu_delivery",
+                "title": "Delivery & Print Ordering",
+                "description": "Download formats, cloud backup, and print studio",
+                "icon": "truck"
+              },
+              {
+                "id": "menu_talk_to_person",
+                "title": "Custom Message — Talk to a Person",
+                "description": "Leave a direct message for the studio team",
+                "icon": "user"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "conv_1792389492016_vsey",
+      "botId": "bot_photo_101",
+      "customerSessionId": "client_1792389492016",
+      "startedAt": "2026-10-19T05:58:12.016Z",
+      "lastActivityAt": "2026-10-19T05:58:12.016Z",
+      "status": "active",
+      "messages": [
+        {
+          "id": "msg_init_1792389492016",
+          "conversationId": "conv_1792389492016_vsey",
+          "sender": "bot",
+          "text": "Hey! Welcome to Lens & Light Photography. How can we help you today?",
+          "timestamp": "2026-10-19T05:58:12.016Z",
+          "payload": {
+            "type": "menu",
+            "menuItems": [
+              {
+                "id": "menu_services",
+                "title": "Services & Prices",
+                "description": "Explore portrait, wedding, and event packages",
+                "icon": "camera"
+              },
+              {
+                "id": "menu_portfolio",
+                "title": "Portfolio & Galleries",
+                "description": "View curated highlights from recent sessions",
+                "icon": "image"
+              },
+              {
+                "id": "menu_policies",
+                "title": "Policies & Information",
+                "description": "Session prep, turnaround times, and booking terms",
+                "icon": "file-text"
+              },
+              {
+                "id": "menu_delivery",
+                "title": "Delivery & Print Ordering",
+                "description": "Download formats, cloud backup, and print studio",
+                "icon": "truck"
+              },
+              {
+                "id": "menu_talk_to_person",
+                "title": "Custom Message — Talk to a Person",
+                "description": "Leave a direct message for the studio team",
+                "icon": "user"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "conv_1792390137011_oljg",
+      "botId": "bot_photo_101",
+      "customerSessionId": "client_1792390137011",
+      "startedAt": "2026-10-19T06:08:57.011Z",
+      "lastActivityAt": "2026-10-19T06:09:48.324Z",
+      "status": "active",
+      "messages": [
+        {
+          "id": "msg_init_1792390137011",
+          "conversationId": "conv_1792390137011_oljg",
+          "sender": "bot",
+          "text": "Hey! Welcome to Lens & Light Photography. How can we help you today?",
+          "timestamp": "2026-10-19T06:08:57.011Z",
+          "payload": {
+            "type": "menu",
+            "menuItems": [
+              {
+                "id": "menu_services",
+                "title": "Services & Prices",
+                "description": "Explore portrait, wedding, and event packages",
+                "icon": "camera"
+              },
+              {
+                "id": "menu_portfolio",
+                "title": "Portfolio & Galleries",
+                "description": "View curated highlights from recent sessions",
+                "icon": "image"
+              },
+              {
+                "id": "menu_policies",
+                "title": "Policies & Information",
+                "description": "Session prep, turnaround times, and booking terms",
+                "icon": "file-text"
+              },
+              {
+                "id": "menu_delivery",
+                "title": "Delivery & Print Ordering",
+                "description": "Download formats, cloud backup, and print studio",
+                "icon": "truck"
+              },
+              {
+                "id": "menu_talk_to_person",
+                "title": "Custom Message — Talk to a Person",
+                "description": "Leave a direct message for the studio team",
+                "icon": "user"
+              }
+            ]
+          }
+        },
+        {
+          "id": "msg_u_1792390173510",
+          "conversationId": "conv_1792390137011_oljg",
+          "sender": "customer",
+          "text": "What portrait packages do you offer?",
+          "timestamp": "2026-10-19T06:09:33.510Z"
+        },
+        {
+          "id": "msg_b_1792390181516",
+          "conversationId": "conv_1792390137011_oljg",
+          "sender": "bot",
+          "text": "We recommend solid neutral or jewel-toned colors. Avoid small repetitive stripes, neon colors, and prominent logos. Bring 2 to 3 outfit options so the photographer can help select what photographs best with our backdrop setup.\n\nFeel free to explore our menu options below or leave a message for our team.",
+          "timestamp": "2026-10-19T06:09:41.516Z",
+          "payload": {
+            "type": "ai_response",
+            "sourceConfidence": "knowledge_base",
+            "breadcrumbs": [
+              {
+                "label": "Main Menu"
+              }
+            ]
+          }
+        },
+        {
+          "id": "msg_u_1792390188324",
+          "conversationId": "conv_1792390137011_oljg",
+          "sender": "customer",
+          "text": "Services & Prices",
+          "timestamp": "2026-10-19T06:09:48.324Z"
+        },
+        {
+          "id": "msg_b_1792390188324",
+          "conversationId": "conv_1792390137011_oljg",
+          "sender": "bot",
+          "text": "Services & Prices — Explore portrait, wedding, and event packages",
+          "timestamp": "2026-10-19T06:09:48.324Z",
+          "payload": {
+            "type": "subtopic",
+            "breadcrumbs": [
+              {
+                "label": "Main Menu"
+              },
+              {
+                "label": "Services & Prices",
+                "menuId": "menu_services"
+              }
+            ],
+            "subtopics": [
+              {
+                "id": "sub_portrait",
+                "title": "Portrait Sessions",
+                "description": "Individual, executive headshot, and creative portraits",
+                "contentType": "service_product"
+              },
+              {
+                "id": "sub_wedding",
+                "title": "Wedding Photography",
+                "description": "Full-day and elopement wedding coverage",
+                "contentType": "service_product"
+              },
+              {
+                "id": "sub_commercial",
+                "title": "Commercial & Branding",
+                "description": "Brand storytelling, product shots, and team headshots",
+                "contentType": "service_product"
+              }
+            ]
+          }
+        }
+      ]
     }
   ],
   "handoffRequests": [
@@ -1469,7 +1694,7 @@
   ],
   "menuClickCounts": {
     "bot_photo_101": {
-      "menu_services": 19,
+      "menu_services": 20,
       "menu_portfolio": 14,
       "menu_policies": 7,
       "menu_talk_to_person": 5

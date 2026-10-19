@@ -9,11 +9,27 @@ import { STARTER_TEMPLATES, getTemplateById } from './src/data/templates';
 
 dotenv.config();
 
+import { createClient } from '@supabase/supabase-js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+
+// Central Supabase Client (optional server-side client)
+const rawSbUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const rawSbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+const isSupabaseConfigured = Boolean(
+  rawSbUrl &&
+  rawSbKey &&
+  !rawSbUrl.includes('your-project') &&
+  !rawSbKey.includes('your-anon') &&
+  rawSbUrl.startsWith('https://')
+);
+export const serverSupabase = isSupabaseConfigured
+  ? createClient(rawSbUrl!, rawSbKey!, { auth: { persistSession: false } })
+  : null;
 
 // -------------------------------------------------------------
 // Global CORS Middleware (Allows cross-origin requests from Vercel & any site)
@@ -588,46 +604,128 @@ function checkRateLimit(ip: string): boolean {
   return true;
 }
 
+// Helper to map a Supabase bot row to ChatbotConfig
+function mapSupabaseRowToBot(row: any): ChatbotConfig {
+  const appearance = row.appearance_settings || {};
+  const modelSettings = row.model_settings || {};
+  const publicSlug = row.public_slug || `bot-${row.id}`;
+
+  return {
+    id: row.id,
+    ownerId: row.owner_id,
+    publicSlug,
+    workspaceId: 'ws_supabase',
+    name: row.name,
+    businessName: row.business_name || row.name,
+    industry: appearance.industry || 'General Business',
+    description: row.description || '',
+    businessCategory: appearance.businessCategory,
+    primaryPurpose: appearance.primaryPurpose,
+    toneAndPersonality: appearance.toneAndPersonality,
+    suggestedQuestions: appearance.suggestedQuestions || [
+      'What services do you offer?',
+      'How much does it cost?',
+      'How can I get in touch?',
+    ],
+    conversationStyle: appearance.conversationStyle || 'hybrid',
+    status: row.status || 'published',
+    lastPublishedAt: row.published_at,
+    createdAt: row.created_at || new Date().toISOString(),
+    updatedAt: row.updated_at || new Date().toISOString(),
+    currency: appearance.currency || 'ZAR',
+    mainMenuItems: row.main_menu_items || [],
+    appearance: {
+      botDisplayName: appearance.botDisplayName || `${row.business_name || row.name} Assistant`,
+      greetingMessage: row.welcome_message || appearance.greetingMessage || `Hey! Welcome to ${row.business_name || row.name}. How can we help you today?`,
+      logoUrl: appearance.logoUrl || '',
+      brandColor: appearance.brandColor || '#4f46e5',
+      accentColor: appearance.accentColor || '#6366f1',
+      launcherPosition: appearance.launcherPosition || 'bottom_right',
+      headerStyle: appearance.headerStyle || 'solid',
+      widgetSize: appearance.widgetSize || 'standard',
+      welcomeScreenText: appearance.welcomeScreenText || 'Select an option or type your question.',
+    },
+    deployment: {
+      deploymentId: publicSlug,
+      isEnabled: true,
+      allowedDomains: ['*'],
+      embedSnippet: `<script src="/widget.js" data-bot-id="${publicSlug}" async></script>`,
+      whatsappConfig: {
+        isConnected: false,
+        status: 'disconnected',
+      },
+    },
+    aiConfig: {
+      model: modelSettings.model || 'gemini-3.8-flash',
+      systemPrompt: row.system_instructions || '',
+      temperature: modelSettings.temperature ?? 0.3,
+      greetingMessage: row.welcome_message || `Hey! Welcome to ${row.business_name || row.name}. How can we help you today?`,
+      fallbackMessage: modelSettings.fallbackMessage || `I'd love to help you with that! Please choose an option or contact our team.`,
+    },
+  };
+}
+
+// Published Bot Resolver for Public Chatbot Routes
+// CRITICAL: Public chatbot visitors do not require auth.uid(), current user, workspace membership, or bot ownership.
+// Published bots must be retrieved using: public_slug and status='published'.
+async function resolvePublishedBot(identifier: string): Promise<ChatbotConfig | null> {
+  if (!identifier) return null;
+  const decoded = decodeURIComponent(identifier).trim();
+
+  // 1. Check local DB
+  const localBot = DB.getChatbotByDeployment(decoded) || DB.getChatbot(decoded);
+  if (localBot && localBot.status === 'published') {
+    return localBot;
+  }
+
+  // 2. Query Supabase (Central Multi-Tenant Platform DB)
+  if (serverSupabase) {
+    try {
+      // Must query using public_slug and status='published'
+      let { data } = await serverSupabase
+        .from('bots')
+        .select('*')
+        .eq('public_slug', decoded)
+        .eq('status', 'published')
+        .maybeSingle();
+
+      // If not found and identifier is UUID, also check id with status='published'
+      if (!data && decoded.includes('-') && decoded.length === 36) {
+        const byId = await serverSupabase
+          .from('bots')
+          .select('*')
+          .eq('id', decoded)
+          .eq('status', 'published')
+          .maybeSingle();
+        data = byId.data;
+      }
+
+      if (data) {
+        return mapSupabaseRowToBot(data);
+      }
+    } catch (err) {
+      console.warn('Server Supabase published bot resolution notice:', err);
+    }
+  }
+
+  return null;
+}
+
 // 7. Public Bot Config (for Standalone Chat, Widget & External Embeds)
-const handlePublicBotConfig = (req: Request, res: Response) => {
+// CRITICAL FIX: Only missing or unpublished bots return 404. Never return 403 to non-owners.
+const handlePublicBotConfig = async (req: Request, res: Response) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Cache-Control', 'public, max-age=30');
+  res.setHeader('Cache-Control', 'public, max-age=10');
 
   const deploymentId = req.params.deploymentId || (req.params as any).slug;
-  const bot = DB.getChatbotByDeployment(deploymentId);
+  const bot = await resolvePublishedBot(deploymentId);
+
+  // Requirement 5: "Only missing or unpublished bots should return 404."
   if (!bot) {
-    return res.status(404).json({ error: `Chatbot "${deploymentId}" was not found.` });
-  }
-
-  if (bot.status !== 'published') {
-    return res.status(403).json({
-      error: 'This chatbot is currently in draft mode and not published.',
-      status: 'draft',
-    });
-  }
-
-  if (!bot.deployment.isEnabled) {
-    return res.status(403).json({
-      error: 'This chatbot deployment has been disabled by its administrator.',
-      status: 'disabled',
-    });
-  }
-
-  // Domain security check (if allowedDomains does not include wildcard '*')
-  const origin = (req.headers.origin as string) || (req.headers.referer as string) || '';
-  const allowed = bot.deployment.allowedDomains || ['*'];
-  const isAllowed =
-    allowed.includes('*') ||
-    allowed.some((d: string) => {
-      const clean = d.replace(/^https?:\/\//, '').replace(/\/$/, '');
-      return origin.includes(clean);
-    });
-
-  if (!isAllowed) {
-    return res.status(403).json({
-      error: `Domain "${origin}" is not authorized for this chatbot deployment.`,
-      status: 'domain_restricted',
+    return res.status(404).json({
+      error: `Chatbot "${deploymentId}" was not found or is not published.`,
+      status: 'not_found',
     });
   }
 
@@ -649,24 +747,26 @@ const handlePublicBotConfig = (req: Request, res: Response) => {
     appearance: bot.appearance,
     deployment: {
       deploymentId: bot.deployment.deploymentId,
-      isEnabled: bot.deployment.isEnabled,
-      allowedDomains: bot.deployment.allowedDomains,
+      isEnabled: true,
+      allowedDomains: ['*'],
     },
-    mainMenuItems: bot.mainMenuItems.filter((m) => !m.isHidden),
+    mainMenuItems: (bot.mainMenuItems || []).filter((m) => !m.isHidden),
     greetingMessage: bot.appearance.greetingMessage,
   });
 };
 
 app.get('/api/public/bot/:deploymentId', handlePublicBotConfig);
 app.get('/api/public/slug/:deploymentId', handlePublicBotConfig);
+app.get('/api/public/chat/:deploymentId', handlePublicBotConfig);
 app.get('/api/bots/public/:deploymentId', handlePublicBotConfig);
 
 // 8. Chat Session & Message Runtime (Core Engine)
-app.post('/api/chat/session', (req: Request, res: Response) => {
+// CRITICAL: Visitors can start conversations and send messages anonymously without auth.
+const handleChatSession = async (req: Request, res: Response) => {
   const { botId, customerSessionId, customerName, customerContact } = req.body;
-  const bot = DB.getChatbot(botId) || DB.getChatbotByDeployment(botId);
+  const bot = await resolvePublishedBot(botId);
   if (!bot) {
-    return res.status(404).json({ error: 'Chatbot not found' });
+    return res.status(404).json({ error: 'Chatbot not found or not published' });
   }
 
   const convId = `conv_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
@@ -697,10 +797,40 @@ app.post('/api/chat/session', (req: Request, res: Response) => {
   };
 
   DB.saveConversation(newConv);
-  res.json({ conversation: newConv, botName: bot.businessName });
-});
 
-app.post('/api/chat/message', async (req: Request, res: Response) => {
+  // Sync to Supabase if configured on server
+  if (serverSupabase) {
+    (async () => {
+      try {
+        const { data, error } = await serverSupabase.from('conversations').insert({
+          bot_id: bot.id.includes('-') && bot.id.length === 36 ? bot.id : undefined,
+          session_identifier: newConv.customerSessionId,
+          customer_name: customerName || null,
+          customer_contact: customerContact || null,
+          status: 'active',
+        }).select('id').single();
+
+        if (!error && data?.id) {
+          await serverSupabase.from('messages').insert({
+            conversation_id: data.id,
+            role: 'bot',
+            content: initialGreeting.text,
+            payload: initialGreeting.payload,
+          });
+        }
+      } catch (err) {
+        console.warn('Server Supabase session logging notice:', err);
+      }
+    })();
+  }
+
+  res.json({ conversation: newConv, botName: bot.businessName });
+};
+
+app.post('/api/chat/session', handleChatSession);
+app.post('/api/public/chat/session', handleChatSession);
+
+const handleChatMessage = async (req: Request, res: Response) => {
   // Basic abuse protection & rate limit
   const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || 'unknown';
   if (!checkRateLimit(clientIp)) {
@@ -723,9 +853,9 @@ app.post('/api/chat/message', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Message payload too large (maximum 2500 characters).' });
   }
 
-  const bot = DB.getChatbot(botId) || DB.getChatbotByDeployment(botId);
+  const bot = await resolvePublishedBot(botId);
   if (!bot) {
-    return res.status(404).json({ error: 'Chatbot not found' });
+    return res.status(404).json({ error: 'Chatbot not found or not published' });
   }
 
   let conv = DB.getConversation(conversationId);
@@ -993,8 +1123,32 @@ app.post('/api/chat/message', async (req: Request, res: Response) => {
     }
 
     // Hybrid or AI mode: Retrieve relevant knowledge and generate Gemini response
-    const knowledgeBase = DB.getKnowledge(bot.id);
-    const relevantDocs = retrieveRelevantKnowledge(text, knowledgeBase, 3);
+    let knowledgeBase = DB.getKnowledge(bot.id);
+    if ((!knowledgeBase || knowledgeBase.length === 0) && serverSupabase) {
+      try {
+        const { data: kbRows } = await serverSupabase
+          .from('knowledge_sources')
+          .select('*')
+          .eq('bot_id', bot.id);
+        if (kbRows && kbRows.length > 0) {
+          knowledgeBase = kbRows.map((r: any) => ({
+            id: r.id,
+            botId: r.bot_id,
+            title: r.title,
+            category: 'general',
+            type: r.source_type,
+            content: r.content,
+            tags: [],
+            ingestionStatus: r.processing_status || 'ready',
+            createdAt: r.created_at,
+            updatedAt: r.updated_at,
+          }));
+        }
+      } catch (err) {
+        console.warn('Notice loading knowledge sources from Supabase:', err);
+      }
+    }
+    const relevantDocs = retrieveRelevantKnowledge(text, knowledgeBase || [], 3);
 
     // Format history for Gemini
     const historyPayload = conv.messages.slice(-8).map((m) => ({
@@ -1031,11 +1185,37 @@ app.post('/api/chat/message', async (req: Request, res: Response) => {
     conv.messages.push(botMsg);
     conv.lastActivityAt = new Date().toISOString();
     DB.saveConversation(conv);
+
+    if (serverSupabase) {
+      (async () => {
+        try {
+          await serverSupabase.from('messages').insert([
+            {
+              conversation_id: conv.id.includes('-') && conv.id.length === 36 ? conv.id : undefined,
+              role: 'customer',
+              content: text,
+            },
+            {
+              conversation_id: conv.id.includes('-') && conv.id.length === 36 ? conv.id : undefined,
+              role: 'bot',
+              content: botMsg.text,
+              payload: botMsg.payload,
+            },
+          ]);
+        } catch (err) {
+          console.warn('Server Supabase message logging notice:', err);
+        }
+      })();
+    }
+
     return res.json({ botResponse: botMsg, conversation: conv });
   }
 
   res.status(400).json({ error: 'No actionable message payload received' });
-});
+};
+
+app.post('/api/chat/message', handleChatMessage);
+app.post('/api/public/chat/message', handleChatMessage);
 
 // 9. WhatsApp Integration Mock / Webhook Simulator
 app.get('/api/integrations/whatsapp/verify', (req: Request, res: Response) => {

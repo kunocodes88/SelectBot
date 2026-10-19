@@ -25,15 +25,30 @@ export const supabaseDataService = {
   },
 
   // 2. Fetch a single bot by public slug or deployment ID (for public visitors)
+  // CRITICAL: Public chatbot pages must not require auth.uid(), current user, workspace membership, or bot ownership.
   async getPublicBotBySlug(slug: string): Promise<ChatbotConfig | null> {
     if (!isSupabaseConfigured || !slug) return null;
 
-    const { data, error } = await supabase
+    const cleanSlug = decodeURIComponent(slug).trim();
+
+    // Primary lookup: public_slug and status='published'
+    let { data, error } = await supabase
       .from('bots')
-      .select('id, name, business_name, description, welcome_message, appearance_settings, model_settings, main_menu_items, status, public_slug, published_at')
-      .eq('public_slug', slug)
+      .select('*')
+      .eq('public_slug', cleanSlug)
       .eq('status', 'published')
-      .single();
+      .maybeSingle();
+
+    // Fallback: If cleanSlug is a UUID, check id with status='published'
+    if (!data && cleanSlug.includes('-') && cleanSlug.length === 36) {
+      const byId = await supabase
+        .from('bots')
+        .select('*')
+        .eq('id', cleanSlug)
+        .eq('status', 'published')
+        .maybeSingle();
+      data = byId.data;
+    }
 
     if (error || !data) {
       return null;
@@ -165,7 +180,72 @@ export const supabaseDataService = {
     return { path: data.path };
   },
 
-  // 6. Map Supabase table row to ChatbotConfig
+  // 6. Record visitor conversation to Supabase (Anonymous Public Chatbot)
+  async recordConversation(
+    botIdOrSlug: string,
+    sessionId: string,
+    customerName?: string,
+    customerContact?: string
+  ): Promise<string | null> {
+    if (!isSupabaseConfigured) return null;
+    try {
+      let botUuid = botIdOrSlug;
+      if (!botUuid.includes('-') || botUuid.length !== 36) {
+        const { data } = await supabase
+          .from('bots')
+          .select('id')
+          .eq('public_slug', botIdOrSlug)
+          .eq('status', 'published')
+          .maybeSingle();
+        if (data?.id) botUuid = data.id;
+      }
+
+      if (botUuid.includes('-') && botUuid.length === 36) {
+        const { data, error } = await supabase
+          .from('conversations')
+          .insert({
+            bot_id: botUuid,
+            session_identifier: sessionId,
+            customer_name: customerName || null,
+            customer_contact: customerContact || null,
+            status: 'active',
+          })
+          .select('id')
+          .single();
+
+        if (!error && data) return data.id;
+      }
+    } catch (e) {
+      console.warn('Supabase recordConversation notice:', e);
+    }
+    return null;
+  },
+
+  // 7. Record individual message to Supabase
+  async recordMessage(
+    conversationId: string,
+    role: 'customer' | 'bot' | 'agent' | 'system',
+    content: string,
+    payload?: any
+  ): Promise<boolean> {
+    if (!isSupabaseConfigured) return false;
+    try {
+      if (conversationId.includes('-') && conversationId.length === 36) {
+        const { error } = await supabase.from('messages').insert({
+          conversation_id: conversationId,
+          role,
+          content,
+          payload: payload || {},
+        });
+        return !error;
+      }
+    } catch (e) {
+      console.warn('Supabase recordMessage notice:', e);
+    }
+    return false;
+  },
+
+  // 8. Map Supabase table row to ChatbotConfig
   mapDbRowToBot(row: any): ChatbotConfig {
     const appearance = row.appearance_settings || {};
     const modelSettings = row.model_settings || {};

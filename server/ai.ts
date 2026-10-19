@@ -147,7 +147,7 @@ CRITICAL RULES:
       },
     ];
 
-    const response = await client.models.generateContent({
+    const generatePromise = client.models.generateContent({
       model: bot.aiConfig.model || 'gemini-3.8-flash',
       contents,
       config: {
@@ -155,6 +155,12 @@ CRITICAL RULES:
         temperature: bot.aiConfig.temperature || 0.3,
       },
     });
+
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('AI generation request timeout')), 8000)
+    );
+
+    const response = await Promise.race([generatePromise, timeoutPromise]);
 
     const reply = response.text?.trim();
     if (reply) {

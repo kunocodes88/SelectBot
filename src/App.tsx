@@ -14,6 +14,7 @@ import { CreateBotModal } from './components/CreateBotModal';
 import { ChatPreview } from './components/ChatPreview';
 import { LoginView } from './components/LoginView';
 import { StandaloneChatPage } from './components/StandaloneChatPage';
+import { PublicWidgetShowcase } from './components/PublicWidgetShowcase';
 import { SupabaseMigrationModal } from './components/SupabaseMigrationModal';
 import { ChevronDown, AlertCircle, RefreshCw } from 'lucide-react';
 
@@ -25,6 +26,59 @@ import { supabaseDataService } from './services/supabaseDataService';
 import { isSupabaseConfigured } from './services/supabaseClient';
 
 export default function App() {
+  // -------------------------------------------------------------
+  // CRITICAL REQUIREMENT: Public Chatbot Routes (Zero Authentication)
+  // 1. /chat/:slug  -> Standalone branded chat page
+  // 2. /embed/:slug -> Sandboxed chat widget for external iframes
+  // 3. /widget      -> Public embed snippet & tester showcase
+  // These routes return immediately without requiring visitor login
+  // or triggering any auth redirects or prompts.
+  // -------------------------------------------------------------
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+  const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+
+  // Public Route 1: Standalone Chat Page (/chat/:slug or /chat?slug=... or ?chat=:slug)
+  let chatSlug: string | null = null;
+  if (pathname.startsWith('/chat/')) {
+    const slugPart = pathname.replace(/^\/chat\/?/, '').split('/')[0].split('?')[0];
+    if (slugPart.trim()) chatSlug = decodeURIComponent(slugPart.trim());
+  } else if (pathname === '/chat' && (urlParams.get('slug') || urlParams.get('bot') || urlParams.get('public_slug'))) {
+    const param = urlParams.get('slug') || urlParams.get('bot') || urlParams.get('public_slug');
+    if (param && param.trim()) chatSlug = decodeURIComponent(param.trim());
+  } else if (urlParams.get('chat')) {
+    chatSlug = decodeURIComponent(urlParams.get('chat')!.trim());
+  }
+
+  if (chatSlug) {
+    return <StandaloneChatPage slug={chatSlug} isEmbed={false} />;
+  }
+
+  // Public Route 2: Embed Widget (/embed/:slug or /embed?slug=... or ?embed=true)
+  let embedSlug: string | null = null;
+  if (pathname.startsWith('/embed/')) {
+    const slugPart = pathname.replace(/^\/embed\/?/, '').split('/')[0].split('?')[0];
+    if (slugPart.trim()) embedSlug = decodeURIComponent(slugPart.trim());
+  } else if (pathname === '/embed' && (urlParams.get('slug') || urlParams.get('deploymentId') || urlParams.get('public_slug'))) {
+    const param = urlParams.get('slug') || urlParams.get('deploymentId') || urlParams.get('public_slug');
+    if (param && param.trim()) embedSlug = decodeURIComponent(param.trim());
+  } else if (urlParams.get('embed') === 'true') {
+    const param = urlParams.get('deploymentId') || urlParams.get('slug') || urlParams.get('public_slug');
+    if (param && param.trim()) embedSlug = decodeURIComponent(param.trim());
+  }
+
+  if (embedSlug) {
+    return <StandaloneChatPage slug={embedSlug} isEmbed={true} />;
+  }
+
+  // Public Route 3: /widget Documentation & Live Snippet Showcase
+  if (pathname === '/widget' || pathname === '/widget/') {
+    return <PublicWidgetShowcase />;
+  }
+
+  // -------------------------------------------------------------
+  // PROTECTED OWNER DASHBOARD (Requires Authentication)
+  // Only accessed on / and internal management routes
+  // -------------------------------------------------------------
   const { user: firebaseUser, loading: fbLoading, signInWithGoogle } = useFirebaseAuth();
   const { user: supabaseUser, profile: supabaseProfile, loading: sbLoading } = useSupabaseAuth();
 
@@ -49,38 +103,6 @@ export default function App() {
   const activeUserId = supabaseUser?.id || firebaseUser?.uid;
   const authLoading = sbLoading || fbLoading;
 
-  // -------------------------------------------------------------
-  // CRITICAL REQUIREMENT 1: Public Standalone Chatbot Page
-  // Route: /chat/:slug OR ?chat=:slug
-  // Loads WITHOUT requiring visitor to register or log in (works in incognito)
-  // -------------------------------------------------------------
-  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
-  const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
-
-  let standaloneSlug: string | null = null;
-  if (pathname.startsWith('/chat/')) {
-    const slugPart = pathname.replace(/^\/chat\/?/, '').split('/')[0].split('?')[0];
-    if (slugPart.trim()) {
-      standaloneSlug = decodeURIComponent(slugPart.trim());
-    }
-  } else if (urlParams.get('chat')) {
-    standaloneSlug = decodeURIComponent(urlParams.get('chat')!.trim());
-  }
-
-  // If visitor navigated to a standalone chatbot link, render the standalone page immediately
-  if (standaloneSlug) {
-    return <StandaloneChatPage slug={standaloneSlug} />;
-  }
-
-  // -------------------------------------------------------------
-  // CRITICAL REQUIREMENT 2: Embed Widget Mode (?embed=true)
-  // -------------------------------------------------------------
-  const isEmbedMode = urlParams.get('embed') === 'true';
-  const embedDeploymentId = urlParams.get('deploymentId') || urlParams.get('slug');
-
-  const [embedBot, setEmbedBot] = useState<ChatbotConfig | null>(null);
-  const [embedError, setEmbedError] = useState<string | null>(null);
-
   // Load App Data from Supabase / Firebase / Local
   const loadAppData = useCallback(async () => {
     try {
@@ -104,7 +126,7 @@ export default function App() {
           setBots(userBots);
           setActiveBotId((prev) => (prev && userBots.some((b) => b.id === prev) ? prev : userBots[0].id));
         } else {
-          // If no bots in Supabase yet, seed from server default templates
+          // If no bots in Supabase yet, seed from server templates
           const starterBots = await api.getBots();
           if (starterBots.length > 0) {
             setBots(starterBots);
@@ -146,25 +168,9 @@ export default function App() {
     }
   }, [supabaseUser, supabaseProfile, firebaseUser, guestMode]);
 
-  // Main bootstrap sequence
+  // Main bootstrap sequence for Owner Dashboard
   useEffect(() => {
-    if (isEmbedMode && embedDeploymentId) {
-      // In embed mode, fetch public bot by deployment ID directly
-      api
-        .getPublicBot(embedDeploymentId)
-        .then((publicBot) => {
-          setEmbedBot(publicBot);
-          setLoading(false);
-        })
-        .catch((err) => {
-          setEmbedError(err?.message || 'This chatbot widget is currently disabled or in draft mode.');
-          setLoading(false);
-        });
-      return;
-    }
-
     if (authLoading) {
-      // Waiting for auth state resolution
       return;
     }
 
@@ -173,27 +179,24 @@ export default function App() {
     } else {
       setLoading(false);
     }
-  }, [isEmbedMode, embedDeploymentId, authLoading, activeUser, guestMode, loadAppData]);
+  }, [authLoading, activeUser, guestMode, loadAppData]);
 
   // Update a single bot in state & sync to Supabase / Firestore
   const handleUpdateBot = (updated: ChatbotConfig) => {
     setBots((prev) => prev.map((b) => (b.id === updated.id ? updated : b)));
 
-    // Sync to Supabase if authenticated
     if (supabaseUser) {
       supabaseDataService.saveBot(updated, supabaseUser.id).catch((e) => {
         console.warn('Supabase bot sync notice:', e);
       });
     }
 
-    // Sync to Firestore if Firebase authenticated
     if (firebaseUser) {
       firestoreSync.saveChatbot(updated, firebaseUser.uid).catch((e) => {
         console.warn('Firestore bot sync notice:', e);
       });
     }
 
-    // Sync to backend DB
     api.updateBot(updated.id, updated).catch(console.warn);
   };
 
@@ -209,41 +212,13 @@ export default function App() {
       firestoreSync.saveChatbot(newBot, firebaseUser.uid).catch(console.warn);
     }
 
-    // Refresh analytics
     api.getAnalytics().then(setAnalytics).catch(console.error);
   };
-
-  // Embed Mode View (Full iframe chat screen)
-  if (isEmbedMode) {
-    if (loading) {
-      return (
-        <div className="h-screen w-screen flex items-center justify-center bg-white text-xs text-slate-500">
-          Loading chatbot...
-        </div>
-      );
-    }
-    if (embedError) {
-      return (
-        <div className="h-screen w-screen flex flex-col items-center justify-center p-6 bg-slate-50 text-center">
-          <div className="p-3 bg-amber-50 text-amber-700 rounded-lg border border-amber-200 text-xs max-w-sm">
-            {embedError}
-          </div>
-        </div>
-      );
-    }
-    if (embedBot) {
-      return (
-        <div className="h-screen w-screen bg-transparent p-0 overflow-hidden">
-          <ChatPreview bot={embedBot} isStandalone />
-        </div>
-      );
-    }
-  }
 
   // Loading state while resolving auth
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-black text-base shadow-xs">
             S
@@ -257,7 +232,7 @@ export default function App() {
     );
   }
 
-  // Unauthenticated Guard: Show LoginView with Supabase Email/Password, Google Sign-in & Guest Access
+  // Protected Owner Dashboard Guard: Unauthenticated owners see LoginView
   if (!activeUser && !guestMode) {
     return (
       <LoginView
@@ -283,7 +258,7 @@ export default function App() {
         unresolvedCount={analytics?.unresolvedHandoffRequests || 0}
       />
 
-      {/* Bot Selector Sub-Bar (Visible when inside bot-specific tabs like builder, knowledge, appearance, deployment) */}
+      {/* Bot Selector Sub-Bar */}
       {currentTab !== 'dashboard' &&
         currentTab !== 'inbox' &&
         currentTab !== 'actions' &&
