@@ -1,5 +1,6 @@
 import { supabase, isSupabaseConfigured } from './supabaseClient';
 import { ChatbotConfig, KnowledgeBaseItem } from '../types';
+import { generateWidgetEmbedCode } from '../utils/appUrl';
 
 export const supabaseDataService = {
   isConfigured: isSupabaseConfigured,
@@ -24,7 +25,24 @@ export const supabaseDataService = {
     return data.map((row: any) => this.mapDbRowToBot(row));
   },
 
-  // 2. Fetch a single bot by public slug or deployment ID (for public visitors)
+  // 2. Fetch a single bot by ID from Supabase
+  async getBotById(id: string): Promise<ChatbotConfig | null> {
+    if (!isSupabaseConfigured || !id) return null;
+
+    const { data, error } = await supabase
+      .from('bots')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error || !data) {
+      return null;
+    }
+
+    return this.mapDbRowToBot(data);
+  },
+
+  // 3. Fetch a single bot by public slug or deployment ID (for public visitors)
   // CRITICAL: Public chatbot pages must not require auth.uid(), current user, workspace membership, or bot ownership.
   async getPublicBotBySlug(slug: string): Promise<ChatbotConfig | null> {
     if (!isSupabaseConfigured || !slug) return null;
@@ -290,7 +308,7 @@ export const supabaseDataService = {
         deploymentId: publicSlug,
         isEnabled: row.status === 'published',
         allowedDomains: ['*'],
-        embedSnippet: `<script src="/widget.js" data-bot-id="${publicSlug}" async></script>`,
+        embedSnippet: generateWidgetEmbedCode(publicSlug),
         whatsappConfig: {
           isConnected: false,
           status: 'disconnected',
@@ -304,5 +322,92 @@ export const supabaseDataService = {
         fallbackMessage: modelSettings.fallbackMessage || `I'd love to help you with that! Please choose an option or contact our team.`,
       },
     };
+  },
+
+  // 9. Knowledge Base Management via Supabase
+  async getBotKnowledge(botId: string): Promise<KnowledgeBaseItem[]> {
+    if (!isSupabaseConfigured || !botId) return [];
+    try {
+      const { data, error } = await supabase
+        .from('knowledge_sources')
+        .select('*')
+        .eq('bot_id', botId)
+        .order('created_at', { ascending: false });
+
+      if (error || !data) return [];
+
+      return data.map((r: any) => ({
+        id: r.id,
+        botId: r.bot_id,
+        title: r.title,
+        category: (r.metadata && r.metadata.category) || 'general',
+        type: r.source_type,
+        content: r.content || '',
+        tags: (r.metadata && r.metadata.tags) || [],
+        ingestionStatus: r.processing_status || 'ready',
+        createdAt: r.created_at,
+        updatedAt: r.updated_at,
+      }));
+    } catch (e) {
+      console.warn('Error fetching knowledge from Supabase:', e);
+      return [];
+    }
+  },
+
+  async saveKnowledgeItem(
+    botId: string,
+    item: { id?: string; title: string; category?: string; type: string; content: string; tags?: string[] },
+    userId: string
+  ): Promise<KnowledgeBaseItem> {
+    if (!isSupabaseConfigured) throw new Error('Supabase is not configured.');
+
+    const payload: any = {
+      bot_id: botId,
+      owner_id: userId,
+      title: item.title,
+      source_type: item.type || 'text',
+      content: item.content || '',
+      processing_status: 'ready',
+      metadata: {
+        category: item.category || 'general',
+        tags: item.tags || [],
+      },
+      updated_at: new Date().toISOString(),
+    };
+
+    if (item.id && item.id.includes('-') && item.id.length === 36) {
+      payload.id = item.id;
+    }
+
+    const { data, error } = await supabase
+      .from('knowledge_sources')
+      .upsert(payload)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return {
+      id: data.id,
+      botId: data.bot_id,
+      title: data.title,
+      category: data.metadata?.category || 'general',
+      type: data.source_type,
+      content: data.content,
+      tags: data.metadata?.tags || [],
+      ingestionStatus: data.processing_status || 'ready',
+      createdAt: data.created_at,
+      updatedAt: data.updated_at,
+    };
+  },
+
+  async deleteKnowledgeItem(itemId: string, userId: string): Promise<boolean> {
+    if (!isSupabaseConfigured) return false;
+    const { error } = await supabase
+      .from('knowledge_sources')
+      .delete()
+      .eq('id', itemId)
+      .eq('owner_id', userId);
+    return !error;
   },
 };
