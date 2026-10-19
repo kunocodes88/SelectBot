@@ -850,6 +850,316 @@
       },
       "publicSlug": "dep_test_1792355153823",
       "lastPublishedAt": "2026-10-18T20:25:53.830Z"
+    },
+    {
+      "id": "bot_1792390796397_ap82",
+      "workspaceId": "ws_5347aa25",
+      "name": "yeah",
+      "businessName": "yeah",
+      "industry": "Photography Studio",
+      "description": "Designed for portrait, wedding, family, and commercial photographers with portfolio galleries and booking workflows.",
+      "website": "",
+      "contactEmail": "",
+      "contactPhone": "",
+      "conversationStyle": "hybrid",
+      "status": "published",
+      "createdAt": "2026-10-19T06:19:56.397Z",
+      "updatedAt": "2026-10-19T06:20:16.975Z",
+      "currency": "ZAR",
+      "mainMenuItems": [
+        {
+          "id": "menu_services",
+          "title": "Services & Prices",
+          "description": "Explore portrait, wedding, and event packages",
+          "icon": "camera",
+          "isHidden": false,
+          "order": 1,
+          "subtopics": [
+            {
+              "id": "sub_portrait",
+              "title": "Portrait Sessions",
+              "description": "Individual, executive headshot, and creative portraits",
+              "order": 1,
+              "contentType": "service_product",
+              "content": {
+                "serviceProduct": {
+                  "name": "Signature Portrait Session",
+                  "description": "A 60-minute in-studio or on-location portrait experience with professional lighting, outfit changes, and master retouching.",
+                  "price": "R 290.00",
+                  "pricingMethod": "starting_at",
+                  "duration": "60 minutes",
+                  "inclusions": [
+                    "1-hour shooting time",
+                    "2 wardrobe changes",
+                    "Online proofing gallery with 40+ proofs",
+                    "5 high-resolution retouched digital files"
+                  ],
+                  "exclusions": [
+                    "Hair and makeup styling (available as +R 95.00 add-on)",
+                    "Fine-art prints (ordered separately via client store)"
+                  ],
+                  "actionLabel": "Book Session",
+                  "linkedActionId": "act_book_portrait"
+                }
+              }
+            },
+            {
+              "id": "sub_wedding",
+              "title": "Wedding Photography",
+              "description": "Full-day and elopement wedding coverage",
+              "order": 2,
+              "contentType": "service_product",
+              "content": {
+                "serviceProduct": {
+                  "name": "The Storyteller Wedding Collection",
+                  "description": "Full-day documentary wedding coverage by lead photographer with second shooter, engagement session, and heirloom album.",
+                  "price": "R 2,850.00",
+                  "pricingMethod": "fixed",
+                  "duration": "8 hours",
+                  "inclusions": [
+                    "8 hours coverage with 2 photographers",
+                    "Complimentary 1-hour engagement session",
+                    "500+ hand-edited high-res photos with print rights",
+                    "Private online gallery with 1-year cloud backup"
+                  ],
+                  "exclusions": [
+                    "Travel outside 50 km (R 12.50/km)",
+                    "Overtime hours billed at R 300.00/hour"
+                  ],
+                  "actionLabel": "Check Date Availability",
+                  "linkedActionId": "act_wedding_quote"
+                }
+              }
+            },
+            {
+              "id": "sub_commercial",
+              "title": "Commercial & Branding",
+              "description": "Brand storytelling, product shots, and team headshots",
+              "order": 3,
+              "contentType": "service_product",
+              "content": {
+                "serviceProduct": {
+                  "name": "Brand Imagery Package",
+                  "description": "Tailored commercial visual assets for websites, social campaigns, and press kits.",
+                  "price": "R 1,200.00",
+                  "pricingMethod": "starting_at",
+                  "duration": "Half-day (4 hours)",
+                  "inclusions": [
+                    "Pre-shoot mood board and creative consultation",
+                    "4 hours on-site photography",
+                    "Commercial usage license for digital and print",
+                    "35 fully retouched brand assets"
+                  ],
+                  "actionLabel": "Request Commercial Quote",
+                  "linkedActionId": "act_quote"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "menu_portfolio",
+          "title": "Portfolio & Galleries",
+          "description": "View curated highlights from recent sessions",
+          "icon": "image",
+          "isHidden": false,
+          "order": 2,
+          "subtopics": [
+            {
+              "id": "sub_gallery_weddings",
+              "title": "Featured Weddings",
+              "description": "Emotional moments, venues, and candid highlights",
+              "order": 1,
+              "contentType": "gallery",
+              "content": {
+                "gallery": {
+                  "galleryName": "Wedding & Editorial Highlights",
+                  "images": [
+                    {
+                      "url": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+                      "caption": "Sunset vow exchange overlooking coastal cliffs",
+                      "category": "Ceremony"
+                    },
+                    {
+                      "url": "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80",
+                      "caption": "Intimate first dance in vintage greenhouse",
+                      "category": "Reception"
+                    },
+                    {
+                      "url": "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80",
+                      "caption": "Bridal preparation and natural morning light",
+                      "category": "Details"
+                    }
+                  ],
+                  "approvedPortfolioLinks": [
+                    {
+                      "label": "View Full Client Gallery (Pixieset)",
+                      "url": "https://lenslight.pixieset.com"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "id": "sub_gallery_portraits",
+              "title": "Studio Portraits",
+              "description": "Fine art and modern editorial portraits",
+              "order": 2,
+              "contentType": "gallery",
+              "content": {
+                "gallery": {
+                  "galleryName": "Studio & Natural Light Portraits",
+                  "images": [
+                    {
+                      "url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+                      "caption": "High-contrast studio editorial portrait",
+                      "category": "Studio"
+                    },
+                    {
+                      "url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80",
+                      "caption": "Executive headshot for technology founder",
+                      "category": "Corporate"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "menu_policies",
+          "title": "Policies & Information",
+          "description": "Session prep, turnaround times, and booking terms",
+          "icon": "file-text",
+          "isHidden": false,
+          "order": 3,
+          "subtopics": [
+            {
+              "id": "sub_turnaround",
+              "title": "Turnaround Times & Delivery",
+              "description": "When and how you receive your final gallery",
+              "order": 1,
+              "contentType": "information",
+              "content": {
+                "information": {
+                  "title": "Photo Delivery Timeline",
+                  "shortDescription": "Standard turnaround is 10 business days for portraits and 3-4 weeks for weddings.",
+                  "detailedContent": "Portraits are ready in an online preview proofing gallery within 5 days. Once you select your favorite images for retouching, final high-resolution files are delivered within 5 additional business days. Weddings include sneak-peek photos within 48 hours and complete gallery delivery within 3-4 weeks."
+                }
+              }
+            },
+            {
+              "id": "sub_rescheduling",
+              "title": "Rescheduling & Deposit Policy",
+              "description": "Cancellation terms and inclement weather adjustments",
+              "order": 2,
+              "contentType": "policy",
+              "content": {
+                "policy": {
+                  "policyTitle": "Booking Deposit & Rescheduling Rules",
+                  "policyText": "A non-refundable 25% deposit secures your date. In the event of illness or severe weather for outdoor sessions, clients may reschedule once with at least 48 hours notice without incurring a rebooking fee.",
+                  "effectiveDate": "2026-01-01"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "menu_delivery",
+          "title": "Delivery & Print Ordering",
+          "description": "Download formats, cloud backup, and print studio",
+          "icon": "truck",
+          "isHidden": false,
+          "order": 4,
+          "subtopics": [
+            {
+              "id": "sub_digital_delivery",
+              "title": "Digital Downloads & Licenses",
+              "description": "High-resolution JPEG files with full personal print release",
+              "order": 1,
+              "contentType": "faq",
+              "content": {
+                "faq": {
+                  "question": "Can I print my photos wherever I want?",
+                  "approvedAnswer": "Yes! Every delivered digital file includes a full personal print release. You can print them at any lab of your choice or order museum-grade archival prints directly through your private gallery."
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "menu_talk_to_person",
+          "title": "Custom Message — Talk to a Person",
+          "description": "Leave a direct message for the studio team",
+          "icon": "user",
+          "isHidden": false,
+          "order": 5,
+          "subtopics": [
+            {
+              "id": "sub_human_assist",
+              "title": "Contact Studio Director",
+              "description": "Have a bespoke request? Chat with our team",
+              "order": 1,
+              "contentType": "human_assistance",
+              "content": {
+                "humanAssistance": {
+                  "introductoryMessage": "Our lead photographer and studio manager review every custom enquiry personally. Leave your note and preferred contact details below.",
+                  "customerMessagePlaceholder": "Tell us about your shoot date, venue, idea, or questions...",
+                  "requireContactDetails": true,
+                  "contactFields": [
+                    "name",
+                    "email",
+                    "phone"
+                  ],
+                  "handoffDestination": "dashboard_inbox",
+                  "confirmationBehavior": "Our studio director will respond within 4 business hours."
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "appearance": {
+        "botDisplayName": "yeah Assistant",
+        "greetingMessage": "Hey! Welcome to y. How can we help you today?",
+        "logoUrl": "",
+        "brandColor": "#4f46e5",
+        "accentColor": "#6366f1",
+        "launcherPosition": "bottom_right",
+        "headerStyle": "solid",
+        "widgetSize": "standard",
+        "welcomeScreenText": "Select an option below or type your question."
+      },
+      "deployment": {
+        "deploymentId": "y-ktfk",
+        "isEnabled": true,
+        "allowedDomains": [
+          "*"
+        ],
+        "embedSnippet": "<script src=\"/widget.js\" data-bot-id=\"y-ktfk\" async></script>",
+        "whatsappConfig": {
+          "isConnected": false,
+          "status": "disconnected"
+        }
+      },
+      "aiConfig": {
+        "model": "gemini-3.8-flash",
+        "systemPrompt": "You are the AI assistant for yeah in the Photography Studio industry. Tone: warm. Primary purpose: lead_generation.",
+        "temperature": 0.3,
+        "greetingMessage": "Hey! Welcome to y. How can we help you today?",
+        "fallbackMessage": "I'd love to help with that! Let me connect you with a member of our team."
+      },
+      "publicSlug": "y-ktfk",
+      "ownerId": "5347aa25-092a-41d1-ba11-20c2acf2f353",
+      "businessCategory": "Photography Studio",
+      "primaryPurpose": "lead_generation",
+      "toneAndPersonality": "warm",
+      "suggestedQuestions": [
+        "What services do you offer?",
+        "How much does it cost?",
+        "How do I book an appointment?"
+      ],
+      "lastPublishedAt": "2026-10-19T06:19:57.260Z"
     }
   ],
   "knowledge": [
@@ -961,6 +1271,51 @@
       "ingestionStatus": "ready",
       "id": "know_1792355153827_z5bx8",
       "updatedAt": "2026-10-18T20:25:53.827Z"
+    },
+    {
+      "botId": "bot_1792390796397_ap82",
+      "title": "Studio Location & Hours",
+      "category": "hours",
+      "type": "text",
+      "content": "The studio is located at 440 Artisan Way, Suite 200. Open Tuesday through Saturday from 9:00 AM to 6:00 PM by appointment only. Free dedicated parking is available in the rear lot.",
+      "tags": [
+        "location",
+        "parking",
+        "hours"
+      ],
+      "ingestionStatus": "ready",
+      "id": "know_1792390796401_wrvwc",
+      "updatedAt": "2026-10-19T06:19:56.401Z"
+    },
+    {
+      "botId": "bot_1792390796397_ap82",
+      "title": "What to Wear to a Portrait Session",
+      "category": "faq",
+      "type": "faq",
+      "content": "We recommend solid neutral or jewel-toned colors. Avoid small repetitive stripes, neon colors, and prominent logos. Bring 2 to 3 outfit options so the photographer can help select what photographs best with our backdrop setup.",
+      "tags": [
+        "wardrobe",
+        "preparation",
+        "portraits"
+      ],
+      "ingestionStatus": "ready",
+      "id": "know_1792390796403_ad7al",
+      "updatedAt": "2026-10-19T06:19:56.403Z"
+    },
+    {
+      "botId": "bot_1792390796397_ap82",
+      "title": "Payment Terms & Methods",
+      "category": "pricing",
+      "type": "policy",
+      "content": "We accept all major credit cards, debit cards, bank ACH transfers, and Apple Pay. 25% due upon booking, remaining 75% due 48 hours before the shoot date.",
+      "tags": [
+        "payment",
+        "deposit",
+        "credit cards"
+      ],
+      "ingestionStatus": "ready",
+      "id": "know_1792390796405_3zii4",
+      "updatedAt": "2026-10-19T06:19:56.405Z"
     }
   ],
   "conversations": [
@@ -1629,6 +1984,700 @@
           }
         }
       ]
+    },
+    {
+      "id": "conv_1792390368707_ighf",
+      "botId": "bot_bistro_102",
+      "customerSessionId": "client_1792390368707",
+      "startedAt": "2026-10-19T06:12:48.707Z",
+      "lastActivityAt": "2026-10-19T06:12:48.707Z",
+      "status": "active",
+      "messages": [
+        {
+          "id": "msg_init_1792390368707",
+          "conversationId": "conv_1792390368707_ighf",
+          "sender": "bot",
+          "text": "Benvenuti! Welcome to Bella Vista Trattoria. What would you like to explore today?",
+          "timestamp": "2026-10-19T06:12:48.707Z",
+          "payload": {
+            "type": "menu",
+            "menuItems": [
+              {
+                "id": "menu_food_prices",
+                "title": "Menus & Prices",
+                "description": "Explore lunch, dinner, drinks, and daily specials",
+                "icon": "utensils"
+              },
+              {
+                "id": "menu_reservations",
+                "title": "Table Reservations",
+                "description": "Book indoor, terrace, or private dining tables",
+                "icon": "calendar"
+              },
+              {
+                "id": "menu_allergies_policies",
+                "title": "Policies & Dietary Information",
+                "description": "Dress code, corkage fee, and allergen guidelines",
+                "icon": "file-text"
+              },
+              {
+                "id": "menu_delivery_takeout",
+                "title": "Delivery & Takeout",
+                "description": "Direct online ordering and delivery partners",
+                "icon": "truck"
+              },
+              {
+                "id": "menu_speak_manager",
+                "title": "Custom Message — Talk to a Person",
+                "description": "Contact our floor manager or event coordinator",
+                "icon": "user"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "conv_1792390399684_yq8a",
+      "botId": "bot_photo_101",
+      "customerSessionId": "client_1792390399684",
+      "startedAt": "2026-10-19T06:13:19.684Z",
+      "lastActivityAt": "2026-10-19T06:13:28.432Z",
+      "status": "active",
+      "messages": [
+        {
+          "id": "msg_init_1792390399684",
+          "conversationId": "conv_1792390399684_yq8a",
+          "sender": "bot",
+          "text": "Hey! Welcome to Lens & Light Photography. How can we help you today?",
+          "timestamp": "2026-10-19T06:13:19.684Z",
+          "payload": {
+            "type": "menu",
+            "menuItems": [
+              {
+                "id": "menu_services",
+                "title": "Services & Prices",
+                "description": "Explore portrait, wedding, and event packages",
+                "icon": "camera"
+              },
+              {
+                "id": "menu_portfolio",
+                "title": "Portfolio & Galleries",
+                "description": "View curated highlights from recent sessions",
+                "icon": "image"
+              },
+              {
+                "id": "menu_policies",
+                "title": "Policies & Information",
+                "description": "Session prep, turnaround times, and booking terms",
+                "icon": "file-text"
+              },
+              {
+                "id": "menu_delivery",
+                "title": "Delivery & Print Ordering",
+                "description": "Download formats, cloud backup, and print studio",
+                "icon": "truck"
+              },
+              {
+                "id": "menu_talk_to_person",
+                "title": "Custom Message — Talk to a Person",
+                "description": "Leave a direct message for the studio team",
+                "icon": "user"
+              }
+            ]
+          }
+        },
+        {
+          "id": "msg_u_1792390405042",
+          "conversationId": "conv_1792390399684_yq8a",
+          "sender": "customer",
+          "text": "Services & Prices",
+          "timestamp": "2026-10-19T06:13:25.042Z"
+        },
+        {
+          "id": "msg_b_1792390405042",
+          "conversationId": "conv_1792390399684_yq8a",
+          "sender": "bot",
+          "text": "Services & Prices — Explore portrait, wedding, and event packages",
+          "timestamp": "2026-10-19T06:13:25.042Z",
+          "payload": {
+            "type": "subtopic",
+            "breadcrumbs": [
+              {
+                "label": "Main Menu"
+              },
+              {
+                "label": "Services & Prices",
+                "menuId": "menu_services"
+              }
+            ],
+            "subtopics": [
+              {
+                "id": "sub_portrait",
+                "title": "Portrait Sessions",
+                "description": "Individual, executive headshot, and creative portraits",
+                "contentType": "service_product"
+              },
+              {
+                "id": "sub_wedding",
+                "title": "Wedding Photography",
+                "description": "Full-day and elopement wedding coverage",
+                "contentType": "service_product"
+              },
+              {
+                "id": "sub_commercial",
+                "title": "Commercial & Branding",
+                "description": "Brand storytelling, product shots, and team headshots",
+                "contentType": "service_product"
+              }
+            ]
+          }
+        },
+        {
+          "id": "msg_u_1792390408432",
+          "conversationId": "conv_1792390399684_yq8a",
+          "sender": "customer",
+          "text": "Portrait Sessions",
+          "timestamp": "2026-10-19T06:13:28.432Z"
+        },
+        {
+          "id": "msg_b_1792390408432",
+          "conversationId": "conv_1792390399684_yq8a",
+          "sender": "bot",
+          "text": "Here is the information for Portrait Sessions:",
+          "timestamp": "2026-10-19T06:13:28.432Z",
+          "payload": {
+            "type": "content",
+            "breadcrumbs": [
+              {
+                "label": "Main Menu"
+              },
+              {
+                "label": "Services & Prices",
+                "menuId": "menu_services"
+              },
+              {
+                "label": "Portrait Sessions",
+                "subtopicId": "sub_portrait"
+              }
+            ],
+            "contentView": {
+              "contentType": "service_product",
+              "title": "Portrait Sessions",
+              "data": {
+                "serviceProduct": {
+                  "name": "Signature Portrait Session",
+                  "description": "A 60-minute in-studio or on-location portrait experience with professional lighting, outfit changes, and master retouching.",
+                  "price": " R500",
+                  "pricingMethod": "starting_at",
+                  "duration": "60 minutes",
+                  "inclusions": [
+                    "1-hour shooting time",
+                    "2 wardrobe changes",
+                    "Online proofing gallery with 40+ proofs",
+                    "5 high-resolution retouched digital files"
+                  ],
+                  "exclusions": [
+                    "Hair and makeup styling (available as +R 95.00 add-on)",
+                    "Fine-art prints (ordered separately via client store)"
+                  ],
+                  "actionLabel": "Book Session",
+                  "linkedActionId": "act_book_portrait"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "conv_1792390798704_m76q",
+      "botId": "bot_1792390796397_ap82",
+      "customerSessionId": "client_1792390798704",
+      "startedAt": "2026-10-19T06:19:58.704Z",
+      "lastActivityAt": "2026-10-19T06:19:58.704Z",
+      "status": "active",
+      "messages": [
+        {
+          "id": "msg_init_1792390798704",
+          "conversationId": "conv_1792390798704_m76q",
+          "sender": "bot",
+          "text": "Hey! Welcome to y. How can we help you today?",
+          "timestamp": "2026-10-19T06:19:58.704Z",
+          "payload": {
+            "type": "menu",
+            "menuItems": [
+              {
+                "id": "menu_services",
+                "title": "Services & Prices",
+                "description": "Explore portrait, wedding, and event packages",
+                "icon": "camera"
+              },
+              {
+                "id": "menu_portfolio",
+                "title": "Portfolio & Galleries",
+                "description": "View curated highlights from recent sessions",
+                "icon": "image"
+              },
+              {
+                "id": "menu_policies",
+                "title": "Policies & Information",
+                "description": "Session prep, turnaround times, and booking terms",
+                "icon": "file-text"
+              },
+              {
+                "id": "menu_delivery",
+                "title": "Delivery & Print Ordering",
+                "description": "Download formats, cloud backup, and print studio",
+                "icon": "truck"
+              },
+              {
+                "id": "menu_talk_to_person",
+                "title": "Custom Message — Talk to a Person",
+                "description": "Leave a direct message for the studio team",
+                "icon": "user"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "conv_1792390828561_qsp2",
+      "botId": "bot_1792390796397_ap82",
+      "customerSessionId": "client_1792390828561",
+      "startedAt": "2026-10-19T06:20:28.561Z",
+      "lastActivityAt": "2026-10-19T06:56:17.695Z",
+      "status": "active",
+      "messages": [
+        {
+          "id": "msg_init_1792390828561",
+          "conversationId": "conv_1792390828561_qsp2",
+          "sender": "bot",
+          "text": "Hey! Welcome to y. How can we help you today?",
+          "timestamp": "2026-10-19T06:20:28.561Z",
+          "payload": {
+            "type": "menu",
+            "menuItems": [
+              {
+                "id": "menu_services",
+                "title": "Services & Prices",
+                "description": "Explore portrait, wedding, and event packages",
+                "icon": "camera"
+              },
+              {
+                "id": "menu_portfolio",
+                "title": "Portfolio & Galleries",
+                "description": "View curated highlights from recent sessions",
+                "icon": "image"
+              },
+              {
+                "id": "menu_policies",
+                "title": "Policies & Information",
+                "description": "Session prep, turnaround times, and booking terms",
+                "icon": "file-text"
+              },
+              {
+                "id": "menu_delivery",
+                "title": "Delivery & Print Ordering",
+                "description": "Download formats, cloud backup, and print studio",
+                "icon": "truck"
+              },
+              {
+                "id": "menu_talk_to_person",
+                "title": "Custom Message — Talk to a Person",
+                "description": "Leave a direct message for the studio team",
+                "icon": "user"
+              }
+            ]
+          }
+        },
+        {
+          "id": "msg_u_1792390830957",
+          "conversationId": "conv_1792390828561_qsp2",
+          "sender": "customer",
+          "text": "Portfolio & Galleries",
+          "timestamp": "2026-10-19T06:20:30.957Z"
+        },
+        {
+          "id": "msg_b_1792390830957",
+          "conversationId": "conv_1792390828561_qsp2",
+          "sender": "bot",
+          "text": "Portfolio & Galleries — View curated highlights from recent sessions",
+          "timestamp": "2026-10-19T06:20:30.957Z",
+          "payload": {
+            "type": "subtopic",
+            "breadcrumbs": [
+              {
+                "label": "Main Menu"
+              },
+              {
+                "label": "Portfolio & Galleries",
+                "menuId": "menu_portfolio"
+              }
+            ],
+            "subtopics": [
+              {
+                "id": "sub_gallery_weddings",
+                "title": "Featured Weddings",
+                "description": "Emotional moments, venues, and candid highlights",
+                "contentType": "gallery"
+              },
+              {
+                "id": "sub_gallery_portraits",
+                "title": "Studio Portraits",
+                "description": "Fine art and modern editorial portraits",
+                "contentType": "gallery"
+              }
+            ]
+          }
+        },
+        {
+          "id": "msg_u_1792392977695",
+          "conversationId": "conv_1792390828561_qsp2",
+          "sender": "customer",
+          "text": "Featured Weddings",
+          "timestamp": "2026-10-19T06:56:17.695Z"
+        },
+        {
+          "id": "msg_b_1792392977695",
+          "conversationId": "conv_1792390828561_qsp2",
+          "sender": "bot",
+          "text": "Here is the information for Featured Weddings:",
+          "timestamp": "2026-10-19T06:56:17.695Z",
+          "payload": {
+            "type": "content",
+            "breadcrumbs": [
+              {
+                "label": "Main Menu"
+              },
+              {
+                "label": "Portfolio & Galleries",
+                "menuId": "menu_portfolio"
+              },
+              {
+                "label": "Featured Weddings",
+                "subtopicId": "sub_gallery_weddings"
+              }
+            ],
+            "contentView": {
+              "contentType": "gallery",
+              "title": "Featured Weddings",
+              "data": {
+                "gallery": {
+                  "galleryName": "Wedding & Editorial Highlights",
+                  "images": [
+                    {
+                      "url": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+                      "caption": "Sunset vow exchange overlooking coastal cliffs",
+                      "category": "Ceremony"
+                    },
+                    {
+                      "url": "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80",
+                      "caption": "Intimate first dance in vintage greenhouse",
+                      "category": "Reception"
+                    },
+                    {
+                      "url": "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80",
+                      "caption": "Bridal preparation and natural morning light",
+                      "category": "Details"
+                    }
+                  ],
+                  "approvedPortfolioLinks": [
+                    {
+                      "label": "View Full Client Gallery (Pixieset)",
+                      "url": "https://lenslight.pixieset.com"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "conv_1792391908642_zdg8",
+      "botId": "5c1b62ea-06a4-4c27-accb-1d39ad453518",
+      "customerSessionId": "client_1792391908642",
+      "startedAt": "2026-10-19T06:38:28.643Z",
+      "lastActivityAt": "2026-10-19T06:38:28.643Z",
+      "status": "active",
+      "messages": [
+        {
+          "id": "msg_init_1792391908642",
+          "conversationId": "conv_1792391908642_zdg8",
+          "sender": "bot",
+          "text": "Hey! Welcome to y. How can we help you today?",
+          "timestamp": "2026-10-19T06:38:28.642Z",
+          "payload": {
+            "type": "menu",
+            "menuItems": [
+              {
+                "id": "menu_services",
+                "title": "Services & Prices",
+                "description": "Explore portrait, wedding, and event packages",
+                "icon": "camera"
+              },
+              {
+                "id": "menu_portfolio",
+                "title": "Portfolio & Galleries",
+                "description": "View curated highlights from recent sessions",
+                "icon": "image"
+              },
+              {
+                "id": "menu_policies",
+                "title": "Policies & Information",
+                "description": "Session prep, turnaround times, and booking terms",
+                "icon": "file-text"
+              },
+              {
+                "id": "menu_delivery",
+                "title": "Delivery & Print Ordering",
+                "description": "Download formats, cloud backup, and print studio",
+                "icon": "truck"
+              },
+              {
+                "id": "menu_talk_to_person",
+                "title": "Custom Message — Talk to a Person",
+                "description": "Leave a direct message for the studio team",
+                "icon": "user"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "conv_1792391912339_oli6",
+      "botId": "5c1b62ea-06a4-4c27-accb-1d39ad453518",
+      "customerSessionId": "client_1792391912340",
+      "startedAt": "2026-10-19T06:38:32.340Z",
+      "lastActivityAt": "2026-10-19T06:38:32.340Z",
+      "status": "active",
+      "messages": [
+        {
+          "id": "msg_init_1792391912340",
+          "conversationId": "conv_1792391912339_oli6",
+          "sender": "bot",
+          "text": "Hey! Welcome to y. How can we help you today?",
+          "timestamp": "2026-10-19T06:38:32.340Z",
+          "payload": {
+            "type": "menu",
+            "menuItems": [
+              {
+                "id": "menu_services",
+                "title": "Services & Prices",
+                "description": "Explore portrait, wedding, and event packages",
+                "icon": "camera"
+              },
+              {
+                "id": "menu_portfolio",
+                "title": "Portfolio & Galleries",
+                "description": "View curated highlights from recent sessions",
+                "icon": "image"
+              },
+              {
+                "id": "menu_policies",
+                "title": "Policies & Information",
+                "description": "Session prep, turnaround times, and booking terms",
+                "icon": "file-text"
+              },
+              {
+                "id": "menu_delivery",
+                "title": "Delivery & Print Ordering",
+                "description": "Download formats, cloud backup, and print studio",
+                "icon": "truck"
+              },
+              {
+                "id": "menu_talk_to_person",
+                "title": "Custom Message — Talk to a Person",
+                "description": "Leave a direct message for the studio team",
+                "icon": "user"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "conv_1792392596607_0d3p",
+      "botId": "5c1b62ea-06a4-4c27-accb-1d39ad453518",
+      "customerSessionId": "client_1792392596608",
+      "startedAt": "2026-10-19T06:49:56.608Z",
+      "lastActivityAt": "2026-10-19T06:49:56.608Z",
+      "status": "active",
+      "messages": [
+        {
+          "id": "msg_init_1792392596607",
+          "conversationId": "conv_1792392596607_0d3p",
+          "sender": "bot",
+          "text": "Hey! Welcome to y. How can we help you today?",
+          "timestamp": "2026-10-19T06:49:56.607Z",
+          "payload": {
+            "type": "menu",
+            "menuItems": [
+              {
+                "id": "menu_services",
+                "title": "Services & Prices",
+                "description": "Explore portrait, wedding, and event packages",
+                "icon": "camera"
+              },
+              {
+                "id": "menu_portfolio",
+                "title": "Portfolio & Galleries",
+                "description": "View curated highlights from recent sessions",
+                "icon": "image"
+              },
+              {
+                "id": "menu_policies",
+                "title": "Policies & Information",
+                "description": "Session prep, turnaround times, and booking terms",
+                "icon": "file-text"
+              },
+              {
+                "id": "menu_delivery",
+                "title": "Delivery & Print Ordering",
+                "description": "Download formats, cloud backup, and print studio",
+                "icon": "truck"
+              },
+              {
+                "id": "menu_talk_to_person",
+                "title": "Custom Message — Talk to a Person",
+                "description": "Leave a direct message for the studio team",
+                "icon": "user"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "conv_1792392770647_fv2r",
+      "botId": "5c1b62ea-06a4-4c27-accb-1d39ad453518",
+      "customerSessionId": "client_1792392770647",
+      "startedAt": "2026-10-19T06:52:50.647Z",
+      "lastActivityAt": "2026-10-19T06:52:50.647Z",
+      "status": "active",
+      "messages": [
+        {
+          "id": "msg_init_1792392770647",
+          "conversationId": "conv_1792392770647_fv2r",
+          "sender": "bot",
+          "text": "Hey! Welcome to y. How can we help you today?",
+          "timestamp": "2026-10-19T06:52:50.647Z",
+          "payload": {
+            "type": "menu",
+            "menuItems": [
+              {
+                "id": "menu_services",
+                "title": "Services & Prices",
+                "description": "Explore portrait, wedding, and event packages",
+                "icon": "camera"
+              },
+              {
+                "id": "menu_portfolio",
+                "title": "Portfolio & Galleries",
+                "description": "View curated highlights from recent sessions",
+                "icon": "image"
+              },
+              {
+                "id": "menu_policies",
+                "title": "Policies & Information",
+                "description": "Session prep, turnaround times, and booking terms",
+                "icon": "file-text"
+              },
+              {
+                "id": "menu_delivery",
+                "title": "Delivery & Print Ordering",
+                "description": "Download formats, cloud backup, and print studio",
+                "icon": "truck"
+              },
+              {
+                "id": "menu_talk_to_person",
+                "title": "Custom Message — Talk to a Person",
+                "description": "Leave a direct message for the studio team",
+                "icon": "user"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "conv_1792405410185_il1r",
+      "botId": "bot_1792390796397_ap82",
+      "customerSessionId": "client_1792405410185",
+      "startedAt": "2026-10-19T10:23:30.185Z",
+      "lastActivityAt": "2026-10-19T10:23:39.843Z",
+      "status": "active",
+      "messages": [
+        {
+          "id": "msg_init_1792405410185",
+          "conversationId": "conv_1792405410185_il1r",
+          "sender": "bot",
+          "text": "Hey! Welcome to y. How can we help you today?",
+          "timestamp": "2026-10-19T10:23:30.185Z",
+          "payload": {
+            "type": "menu",
+            "menuItems": [
+              {
+                "id": "menu_services",
+                "title": "Services & Prices",
+                "description": "Explore portrait, wedding, and event packages",
+                "icon": "camera"
+              },
+              {
+                "id": "menu_portfolio",
+                "title": "Portfolio & Galleries",
+                "description": "View curated highlights from recent sessions",
+                "icon": "image"
+              },
+              {
+                "id": "menu_policies",
+                "title": "Policies & Information",
+                "description": "Session prep, turnaround times, and booking terms",
+                "icon": "file-text"
+              },
+              {
+                "id": "menu_delivery",
+                "title": "Delivery & Print Ordering",
+                "description": "Download formats, cloud backup, and print studio",
+                "icon": "truck"
+              },
+              {
+                "id": "menu_talk_to_person",
+                "title": "Custom Message — Talk to a Person",
+                "description": "Leave a direct message for the studio team",
+                "icon": "user"
+              }
+            ]
+          }
+        },
+        {
+          "id": "msg_u_1792405414428",
+          "conversationId": "conv_1792405410185_il1r",
+          "sender": "customer",
+          "text": "What services do you offer?",
+          "timestamp": "2026-10-19T10:23:34.428Z"
+        },
+        {
+          "id": "msg_b_1792405419843",
+          "conversationId": "conv_1792405410185_il1r",
+          "sender": "bot",
+          "text": "We offer photography services across portraits, weddings, and commercial branding. Here is an overview of our main packages:\n\n* **Signature Portrait Session** (Starting at R 290.00)  \n  A 60-minute studio session with up to 2 wardrobe changes, an online proofing gallery of 40+ images, and 5 high-resolution retouched digital files.\n\n* **The Storyteller Wedding Collection** (R 2,850.00)  \n  8 hours of comprehensive coverage with 2 photographers, a complimentary 1-hour engagement shoot, 500+ hand-edited high-res images with print rights, and an online gallery.\n\n* **Brand Imagery Package** (Starting at R 1,200.00)  \n  A 4-hour half-day commercial shoot including creative consultation, 35 fully retouched brand assets, and a commercial usage license for print and digital.\n\nWould you like more details on any of these packages or assistance with booking?",
+          "timestamp": "2026-10-19T10:23:39.843Z",
+          "payload": {
+            "type": "ai_response",
+            "sourceConfidence": "knowledge_base",
+            "breadcrumbs": [
+              {
+                "label": "Main Menu"
+              }
+            ]
+          }
+        }
+      ]
     }
   ],
   "handoffRequests": [
@@ -1694,7 +2743,7 @@
   ],
   "menuClickCounts": {
     "bot_photo_101": {
-      "menu_services": 20,
+      "menu_services": 21,
       "menu_portfolio": 14,
       "menu_policies": 7,
       "menu_talk_to_person": 5
@@ -1709,6 +2758,9 @@
     },
     "bot_test_1792355153823": {
       "menu_treatments": 2
+    },
+    "bot_1792390796397_ap82": {
+      "menu_portfolio": 1
     }
   }
 }

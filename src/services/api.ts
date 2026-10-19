@@ -7,6 +7,8 @@ import {
   BotAnalytics,
   ChatMessage,
   Conversation,
+  MainMenuItem,
+  SubtopicItem,
 } from '../types';
 import { db, auth } from '../firebase';
 import {
@@ -440,13 +442,15 @@ export const api = {
       // Backend route unavailable on Vercel, fallback to client-side session generator
     }
 
-    const bot = await this.getBot(botId).catch(() => null);
+    const bot: ChatbotConfig | null =
+      (await this.getPublicBot(botId).catch(() => null)) ||
+      (await this.getBot(botId).catch(() => null));
     const convId = `conv_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
     const initialGreeting =
       bot?.appearance?.greetingMessage ||
       'Hey! Welcome to our studio. What can we help you explore today?';
 
-    const visibleMenus = (bot?.mainMenuItems || []).filter((m) => !m.isHidden);
+    const visibleMenus: MainMenuItem[] = (bot?.mainMenuItems || []).filter((m: MainMenuItem) => !m.isHidden);
 
     const initialMsg: ChatMessage = {
       id: `msg_init_${Date.now()}`,
@@ -521,8 +525,10 @@ export const api = {
       // Backend route unavailable on Vercel, fallback to client-side message generator
     }
 
-    const bot = await this.getBot(payload.botId).catch(() => null);
-    const botMenus = bot?.mainMenuItems || [];
+    const bot: ChatbotConfig | null =
+      (await this.getPublicBot(payload.botId).catch(() => null)) ||
+      (await this.getBot(payload.botId).catch(() => null));
+    const botMenus: MainMenuItem[] = bot?.mainMenuItems || [];
 
     let responseText = 'Please select one of our main options below:';
     let messagePayload: ChatMessage['payload'] = undefined;
@@ -545,7 +551,7 @@ export const api = {
         responseText = menu.introductoryMessage?.trim() || `${menu.title} — ${menu.description || 'Select an option below:'}`;
         messagePayload = {
           type: 'subtopic',
-          subtopics: menu.subtopics.map((s) => ({
+          subtopics: (menu.subtopics || []).map((s: SubtopicItem) => ({
             id: s.id,
             title: s.title,
             description: s.description,
@@ -555,7 +561,7 @@ export const api = {
       }
     } else if (payload.selectedSubtopicId) {
       for (const m of botMenus) {
-        const sub = m.subtopics.find((s) => s.id === payload.selectedSubtopicId);
+        const sub = (m.subtopics || []).find((s: SubtopicItem) => s.id === payload.selectedSubtopicId);
         if (sub) {
           responseText = `${sub.title}: ${sub.description || 'Here are the details.'}`;
           messagePayload = {
@@ -624,7 +630,7 @@ export const api = {
 
   // Public deployment check (Works for slug, deploymentId, or botId)
   // CRITICAL: Public chatbot visitors require ZERO authentication, tokens, or ownership checks.
-  async getPublicBot(deploymentId: string): Promise<any> {
+  async getPublicBot(deploymentId: string): Promise<ChatbotConfig> {
     if (!deploymentId) {
       throw new Error('404 - Chatbot not found or not published.');
     }
@@ -664,7 +670,7 @@ export const api = {
       );
       const snap = await getDocs(q);
       if (!snap.empty) {
-        return snap.docs[0].data();
+        return snap.docs[0].data() as ChatbotConfig;
       }
     } catch (e) {
       console.warn('Firestore getPublicBot fallback notice:', e);

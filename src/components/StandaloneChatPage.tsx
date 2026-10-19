@@ -29,7 +29,7 @@ export function StandaloneChatPage({ slug, isEmbed = false }: StandaloneChatPage
         if (isMounted) {
           setError(
             err?.message ||
-              'This chatbot is currently in draft mode or has been disabled by its administrator.'
+              'This chatbot was not found or has not been published yet.'
           );
         }
       } finally {

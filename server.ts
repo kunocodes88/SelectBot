@@ -189,10 +189,10 @@ app.get('/widget.js', (req: Request, res: Response) => {
     container.id = 'selectbot-widget-container';
     container.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:999999;font-family:system-ui,-apple-system,sans-serif;pointer-events:none;';
 
-    // The chat widget iframe
+    // The chat widget iframe (clean public route with zero auth)
     var iframe = document.createElement('iframe');
     iframe.id = 'selectbot-frame';
-    iframe.src = hostUrl + '/?embed=true&deploymentId=' + encodeURIComponent(botId);
+    iframe.src = hostUrl + '/embed/' + encodeURIComponent(botId);
     iframe.title = (botData && botData.businessName) ? (botData.businessName + ' Chat Assistant') : 'SelectBot Chat Assistant';
     iframe.setAttribute('allow', 'clipboard-write');
     iframe.style.cssText = 'position:fixed;bottom:96px;right:24px;width:390px;height:620px;max-width:calc(100vw - 32px);max-height:calc(100vh - 120px);border:none;border-radius:16px;box-shadow:0 20px 40px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.06);display:none;transition:opacity 0.2s ease, transform 0.2s ease;z-index:999998;pointer-events:auto;background:transparent;';
